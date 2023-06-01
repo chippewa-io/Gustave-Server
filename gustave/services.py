@@ -259,12 +259,12 @@ def unscope_profile(profile_id):
 
 def cleanup_expired_profiles():
     with app.app_context():
-    # Get the computer IDs from the secret_table where the expiration has passed
-    expired_computer_ids = get_expired_computer_ids()
+        # Get the computer IDs from the secret_table where the expiration has passed
+        expired_computer_ids = get_expired_computer_ids()
 
-    # Query the active_profile table for profile IDs scoped to those computer IDs
-    scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+        # Query the active_profile table for profile IDs scoped to those computer IDs
+        scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-    # Unscope profiles
-    for profile_id in scoped_profile_ids:
-        unscope_profile(profile_id)
+        # Unscope profiles
+        for profile_id in scoped_profile_ids:
+            unscope_profile(profile_id)
