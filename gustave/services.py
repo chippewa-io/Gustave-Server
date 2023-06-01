@@ -183,7 +183,7 @@ def get_expired_computer_ids():
 
     with app.app_context():
         # Connect to MySQL database
-        conn = mysql.connector.connect(
+        conn = mysql_connector.connect(
             user=app.config['MYSQL_DATABASE_USER'],
             password=app.config['MYSQL_DATABASE_PASSWORD'],
             host=app.config['MYSQL_DATABASE_HOST'],
@@ -213,7 +213,7 @@ def get_scoped_profile_ids(computer_ids):
 
     with app.app_context():
         # Connect to MySQL database
-        conn = mysql.connector.connect(
+        conn = mysql_connector.connect(
             user=app.config['MYSQL_DATABASE_USER'],
             password=app.config['MYSQL_DATABASE_PASSWORD'],
             host=app.config['MYSQL_DATABASE_HOST'],
