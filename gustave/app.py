@@ -7,7 +7,7 @@ from routes.computers import computers_bp
 from routes.token_generation import token_generation_bp
 from routes.secret import secrets_bp
 # Import init_db function
-from services import init_db, insert_into_active_profiles
+from services import init_db, cleanup_expired_profiles
 
 # Create app
 def create_app(config_class=config.DevelopmentConfig):
