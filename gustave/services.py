@@ -258,6 +258,7 @@ def unscope_profile(profile_id):
     # Make sure to handle any authentication required by Jamf Pro API
 
 def cleanup_expired_profiles():
+    with app.app_context():
     # Get the computer IDs from the secret_table where the expiration has passed
     expired_computer_ids = get_expired_computer_ids()
 
