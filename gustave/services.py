@@ -153,19 +153,22 @@ def check_for_expired_secrets():
 
 ##New Function: 
 def insert_into_active_profiles():
-    with current_app.app_context():
-        # Get MySQL connection details from config
-        user = current_app.config['MYSQL_DATABASE_USER']
-        password = current_app.config['MYSQL_DATABASE_PASSWORD']
-        host = current_app.config['MYSQL_DATABASE_HOST']
-        database = current_app.config['MYSQL_DATABASE_DB']
+    # Create a new Flask application instance
+    app = Flask(__name__)
+    app.config.from_object(config.DevelopmentConfig)
 
-        # Connect to MySQL
-        conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
-        cursor = conn.cursor()
-        query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
-        values = (90, 170)  # Replace with the actual values you want to insert
-        cursor.execute(query, values)
-        conn.commit()
-        cursor.close()
-        conn.close()
+    # Get MySQL connection details from config
+    user = app.config['MYSQL_DATABASE_USER']
+    password = app.config['MYSQL_DATABASE_PASSWORD']
+    host = app.config['MYSQL_DATABASE_HOST']
+    database = app.config['MYSQL_DATABASE_DB']
+
+    # Connect to MySQL
+    conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
+    cursor = conn.cursor()
+    query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
+    values = (90, 170)  # Replace with the actual values you want to insert
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    conn.close()
