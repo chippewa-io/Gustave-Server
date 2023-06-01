@@ -178,54 +178,62 @@ def check_for_expired_secrets():
 
 ###New Functions
 def get_expired_computer_ids():
-    # Connect to MySQL database
-    conn = mysql.connector.connect(
-        user=current_app.config['MYSQL_DATABASE_USER'],
-        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
-        host=current_app.config['MYSQL_DATABASE_HOST'],
-        database=current_app.config['MYSQL_DATABASE_DB']
-    )
+    app = Flask(__name__)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
 
-    # Get current timestamp
-    current_time = int(time.time())
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql.connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
 
-    # Query the secret_table for computer IDs with expired secrets
-    query = f"SELECT computer_id FROM secret_table WHERE expiration < {current_time}"
-    cursor = conn.cursor()
-    cursor.execute(query)
-    result = cursor.fetchall()
+        # Get current timestamp
+        current_time = int(time.time())
 
-    # Close database connection
-    conn.close()
+        # Query the secret_table for computer IDs with expired secrets
+        query = f"SELECT computer_id FROM secret_table WHERE expiration < {current_time}"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
 
-    # Extract the computer IDs from the query result
-    expired_computer_ids = [row[0] for row in result]
+        # Close database connection
+        conn.close()
 
-    return expired_computer_ids
+        # Extract the computer IDs from the query result
+        expired_computer_ids = [row[0] for row in result]
+
+        return expired_computer_ids
 
 def get_scoped_profile_ids(computer_ids):
-    # Connect to MySQL database
-    conn = mysql.connector.connect(
-        user=current_app.config['MYSQL_DATABASE_USER'],
-        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
-        host=current_app.config['MYSQL_DATABASE_HOST'],
-        database=current_app.config['MYSQL_DATABASE_DB']
-    )
+    app = Flask(__name__)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
 
-    # Query the active_profiles table for profile IDs scoped to the given computer IDs
-    computer_ids_str = ', '.join(str(computer_id) for computer_id in computer_ids)
-    query = f"SELECT profile_id FROM active_profiles WHERE computer_id IN ({computer_ids_str})"
-    cursor = conn.cursor()
-    cursor.execute(query)
-    result = cursor.fetchall()
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql.connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
 
-    # Close database connection
-    conn.close()
+        # Query the active_profiles table for profile IDs scoped to the given computer IDs
+        computer_ids_str = ', '.join(str(computer_id) for computer_id in computer_ids)
+        query = f"SELECT profile_id FROM active_profiles WHERE computer_id IN ({computer_ids_str})"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
 
-    # Extract the profile IDs from the query result
-    scoped_profile_ids = [row[0] for row in result]
+        # Close database connection
+        conn.close()
 
-    return scoped_profile_ids
+        # Extract the profile IDs from the query result
+        scoped_profile_ids = [row[0] for row in result]
+
+        return scoped_profile_ids
 
 def unscope_profile(profile_id):
     url = f"{current_app.config['JAMF_PRO_URL']}/osxconfigurationprofiles/id/{profile_id}"
