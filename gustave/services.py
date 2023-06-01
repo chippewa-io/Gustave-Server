@@ -7,6 +7,8 @@ import xml.etree.ElementTree as ET
 from flaskext.mysql import MySQL
 from flask import current_app
 from config import Config
+from flask import Flask
+
 
 
 #MySQL Connection
