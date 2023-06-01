@@ -148,3 +148,14 @@ def check_for_expired_secrets():
 
     cursor.close()
     conn.close()
+
+##New Function: 
+def insert_into_active_profiles():
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+    query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
+    values = (10, 10)  # Replace with the actual values you want to insert
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+
