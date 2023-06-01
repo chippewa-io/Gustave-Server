@@ -209,3 +209,4 @@ def cleanup_expired_profiles():
     # Unscope profiles
     for profile_id in scoped_profile_ids:
         unscope_profile(profile_id)
+test
