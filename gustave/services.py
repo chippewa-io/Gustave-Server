@@ -153,8 +153,14 @@ def check_for_expired_secrets():
 
 ##New Function: 
 def insert_into_active_profiles():
-    # Replace with your actual MySQL connection details
-    conn = mysql_connector.connect(user='chris', password='gustave2', host='localhost', database='secrets')
+   # Get MySQL connection details from config
+    user = current_app.config['MYSQL_DATABASE_USER']
+    password = current_app.config['MYSQL_DATABASE_PASSWORD']
+    host = current_app.config['MYSQL_DATABASE_HOST']
+    database = current_app.config['MYSQL_DATABASE_DB']
+
+    # Connect to MySQL
+    conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
     cursor = conn.cursor()
     query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
     values = (90, 170)  # Replace with the actual values you want to insert
