@@ -175,3 +175,37 @@ def insert_into_active_profiles():
     conn.commit()
     cursor.close()
     conn.close()
+
+###New Functions
+def unscope_profile(profile_id):
+    url = f"{current_app.config['JAMF_PRO_URL']}/osxconfigurationprofiles/id/{profile_id}"
+    headers = {"Accept": "application/json"}
+
+    data = """
+    <os_x_configuration_profile>
+        <scope>
+            <all_computers>false</all_computers>
+            <all_jss_users>false</all_jss_users>
+            <buildings/>
+            <departments/>
+            <computer_groups/>
+            <jss_users/>
+            <jss_user_groups/>
+        </scope>
+    </os_x_configuration_profile>
+    """
+
+    # Send API request to unscope profile
+    # You can use your preferred method for sending API requests (e.g., requests library)
+    # Make sure to handle any authentication required by Jamf Pro API
+
+def cleanup_expired_profiles():
+    # Get the computer IDs from the secret_table where the expiration has passed
+    expired_computer_ids = get_expired_computer_ids()
+
+    # Query the active_profile table for profile IDs scoped to those computer IDs
+    scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+
+    # Unscope profiles
+    for profile_id in scoped_profile_ids:
+        unscope_profile(profile_id)
