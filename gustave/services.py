@@ -8,6 +8,7 @@ from flaskext.mysql import MySQL
 from flask import current_app
 from config import Config
 from flask import Flask
+import gustave.config as config
 
 
 
