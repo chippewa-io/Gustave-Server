@@ -2,7 +2,7 @@ import requests
 import datetime
 import secrets
 import subprocess
-import mysql.connector
+import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from flaskext.mysql import MySQL
 from flask import current_app
@@ -154,7 +154,7 @@ def check_for_expired_secrets():
 ##New Function: 
 def insert_into_active_profiles():
     # Replace with your actual MySQL connection details
-    conn = mysql.connector.connect(user='chris', password='gustave2', host='localhost', database='secrets')
+    conn = mysql_connector.connect.(user='chris', password='gustave2', host='localhost', database='secrets')
     cursor = conn.cursor()
     query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
     values = (90, 170)  # Replace with the actual values you want to insert
