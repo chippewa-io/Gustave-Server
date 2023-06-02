@@ -68,7 +68,7 @@ def get_secret(udid):
     conn = mysql.get_db()
     cursor = conn.cursor()
 
-    query = "SELECT secret FROM secret_table WHERE udid = %s"
+    query = "SELECT secret FROM secret_table WHERE udid = %s AND expiration < UNIX_TIMESTAMP()"
     values = (udid,)
     cursor.execute(query, values)
     result = cursor.fetchone()
@@ -174,29 +174,6 @@ def check_for_expired_secrets():
     cursor.close()
     conn.close()
 
-##New Function: 
-# def insert_into_active_profiles():
-#     # Create a new Flask application instance
-#     app = Flask(__name__)
-#     app.config.from_object(config.DevelopmentConfig)
-
-#     # Get MySQL connection details from config
-#     user = app.config['MYSQL_DATABASE_USER']
-#     password = app.config['MYSQL_DATABASE_PASSWORD']
-#     host = app.config['MYSQL_DATABASE_HOST']
-#     database = app.config['MYSQL_DATABASE_DB']
-
-#     # Connect to MySQL
-#     conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
-#     cursor = conn.cursor()
-#     query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
-#     values = (90, 170)  # Replace with the actual values you want to insert
-#     cursor.execute(query, values)
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
-
-###New Functions
 def get_expired_computer_ids():
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
