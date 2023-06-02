@@ -80,7 +80,6 @@ def get_secret(udid):
     else:
         return None
 
-
 def generate_jamf_pro_token():
     url = f"{Config.JAMF_PRO_URL}/uapi/auth/tokens"
     auth = (Config.JAMF_PRO_USERNAME, Config.JAMF_PRO_PASSWORD)
@@ -304,6 +303,15 @@ def unscope_profile(profile_id):
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
         move_profiles(profile_id)
+
+        # Additional DELETE request
+        delete_response = requests.delete(url, headers=headers)
+
+        if delete_response.status_code == 200:
+            print(f"Successfully deleted profile with ID {profile_id}.")
+        else:
+            print(f"Failed to delete profile with ID {profile_id}. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
