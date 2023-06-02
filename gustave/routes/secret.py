@@ -8,7 +8,7 @@ def new_secret():
     udid = request.form.get('udid')
     
     existing_secret = get_secret(udid)
-    if existing_secret:
+    if existing_secret and existing_secret['expiration'] > time.time():
         return jsonify({'message': 'A secret already exists for this computer'})
     # Step 1: Fetch the Computer ID from Jamf Pro using the UDID
     computer_id = get_computer_id(udid)

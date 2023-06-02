@@ -68,7 +68,7 @@ def get_secret(udid):
     conn = mysql.get_db()
     cursor = conn.cursor()
 
-    query = "SELECT secret FROM secret_table WHERE udid = %s AND expiration < UNIX_TIMESTAMP()"
+    query = "SELECT secret, expiration FROM secret_table WHERE udid = %s"
     values = (udid,)
     cursor.execute(query, values)
     result = cursor.fetchone()
@@ -76,7 +76,7 @@ def get_secret(udid):
     cursor.close()
 
     if result:
-        return result[0]
+        return {'secret': result[0], 'expiration': result[1]}
     else:
         return None
 
