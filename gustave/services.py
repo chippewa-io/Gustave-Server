@@ -281,7 +281,7 @@ def unscope_profile(profile_id):
 
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
-        move_profiles(scoped_profile_ids)
+        move_profiles(profile_id)
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
