@@ -64,6 +64,22 @@ def generate_token_hash():
     token = secrets.token_hex(32)
     return token
 
+def get_secret(udid):
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+
+    query = "SELECT secret, expiration FROM secret_table WHERE udid = %s"
+    values = (udid,)
+    cursor.execute(query, values)
+    result = cursor.fetchone()
+
+    cursor.close()
+
+    if result:
+        return {'secret': result[0], 'expiration': result[1]}
+    else:
+        return None
+
 def generate_jamf_pro_token():
     url = f"{Config.JAMF_PRO_URL}/uapi/auth/tokens"
     auth = (Config.JAMF_PRO_USERNAME, Config.JAMF_PRO_PASSWORD)
@@ -158,29 +174,6 @@ def check_for_expired_secrets():
     cursor.close()
     conn.close()
 
-##New Function: 
-# def insert_into_active_profiles():
-#     # Create a new Flask application instance
-#     app = Flask(__name__)
-#     app.config.from_object(config.DevelopmentConfig)
-
-#     # Get MySQL connection details from config
-#     user = app.config['MYSQL_DATABASE_USER']
-#     password = app.config['MYSQL_DATABASE_PASSWORD']
-#     host = app.config['MYSQL_DATABASE_HOST']
-#     database = app.config['MYSQL_DATABASE_DB']
-
-#     # Connect to MySQL
-#     conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
-#     cursor = conn.cursor()
-#     query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
-#     values = (90, 170)  # Replace with the actual values you want to insert
-#     cursor.execute(query, values)
-#     conn.commit()
-#     cursor.close()
-#     conn.close()
-
-###New Functions
 def get_expired_computer_ids():
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
@@ -212,6 +205,8 @@ def get_expired_computer_ids():
         return expired_computer_ids
 
 def get_scoped_profile_ids(computer_ids):
+    if not computer_ids:
+        return []
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
 
@@ -285,6 +280,15 @@ def unscope_profile(profile_id):
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
         move_profiles(profile_id)
+
+        # Additional DELETE request
+        delete_response = requests.delete(url, headers=headers)
+
+        if delete_response.status_code == 200:
+            print(f"Successfully deleted profile with ID {profile_id}.")
+        else:
+            print(f"Failed to delete profile with ID {profile_id}. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
