@@ -246,7 +246,6 @@ def unscope_profile(profile_id):
     }
 
     data = """
-    <?xml version="1.0" encoding="UTF-8"?>
 <os_x_configuration_profile>
     <scope>
         <all_computers>false</all_computers>
