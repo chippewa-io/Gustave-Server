@@ -281,10 +281,11 @@ def unscope_profile(profile_id):
 
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
+        move_profiles(profile_id)
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
-def move_profiles(scoped_profile_ids):
+def move_profiles(profile_id):
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
 
@@ -339,9 +340,6 @@ def cleanup_expired_profiles(app):
 
         # Query the active_profile table for profile IDs scoped to those computer IDs
         scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
-
-        # Move profiles from active_profiles to expired_profiles
-        move_profiles(scoped_profile_ids)
 
         # Unscope profiles
         for profile_id in scoped_profile_ids:
