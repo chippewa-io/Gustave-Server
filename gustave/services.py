@@ -64,6 +64,23 @@ def generate_token_hash():
     token = secrets.token_hex(32)
     return token
 
+def get_secret(udid):
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+
+    query = "SELECT secret FROM secret_table WHERE udid = %s"
+    values = (udid,)
+    cursor.execute(query, values)
+    result = cursor.fetchone()
+
+    cursor.close()
+
+    if result:
+        return result[0]
+    else:
+        return None
+
+
 def generate_jamf_pro_token():
     url = f"{Config.JAMF_PRO_URL}/uapi/auth/tokens"
     auth = (Config.JAMF_PRO_USERNAME, Config.JAMF_PRO_PASSWORD)

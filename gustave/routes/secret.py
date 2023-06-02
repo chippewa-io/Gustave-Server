@@ -6,7 +6,10 @@ secrets_bp = Blueprint('secrets', __name__)
 @secrets_bp.route('/secret', methods=['POST'])
 def new_secret():
     udid = request.form.get('udid')
-
+    
+    existing_secret = get_secret(udid)
+    if existing_secret:
+        return jsonify({'message': 'A secret already exists for this computer'})
     # Step 1: Fetch the Computer ID from Jamf Pro using the UDID
     computer_id = get_computer_id(udid)
 
