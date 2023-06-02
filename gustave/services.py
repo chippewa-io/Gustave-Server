@@ -284,6 +284,55 @@ def unscope_profile(profile_id):
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
+def move_profiles(scoped_profile_ids):
+    app = Flask(__name__)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
+
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql_connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
+
+        # Move records from active_profiles to expired_profiles
+        try:
+            # Start a transaction
+            conn.start_transaction()
+
+            # Query the active_profiles table for profile IDs scoped to the given profile IDs
+            scoped_profile_ids_str = ', '.join(str(profile_id) for profile_id in scoped_profile_ids)
+            query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id IN ({scoped_profile_ids_str})"
+            cursor = conn.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
+
+            # Move records to the expired_profiles table
+            for row in result:
+                profile_id, computer_id = row
+                insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+                cursor.execute(insert_query)
+
+            # Delete records from the active_profiles table
+            delete_query = f"DELETE FROM active_profiles WHERE profile_id IN ({scoped_profile_ids_str})"
+            cursor.execute(delete_query)
+
+            # Commit the transaction
+            conn.commit()
+        except Exception as e:
+            # Rollback the transaction in case of any errors
+            conn.rollback()
+            raise e
+        finally:
+            # Close database connection
+            conn.close()
+
+        return
+
+
+
 def cleanup_expired_profiles(app):
     with app.app_context():
         # Get the computer IDs from the secret_table where the expiration has passed
@@ -291,6 +340,9 @@ def cleanup_expired_profiles(app):
 
         # Query the active_profile table for profile IDs scoped to those computer IDs
         scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+        
+        # Move profiles from active_profiles to expired_profiles
+        move_profiles(scoped_profile_ids)
 
         # Unscope profiles
         for profile_id in scoped_profile_ids:
