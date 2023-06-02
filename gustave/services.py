@@ -237,8 +237,12 @@ def get_scoped_profile_ids(computer_ids):
         return scoped_profile_ids
 
 def unscope_profile(profile_id):
-    url = f"{current_app.config['JAMF_PRO_URL']}/osxconfigurationprofiles/id/{profile_id}"
-    headers = {"Accept": "application/json"}
+    url = f"{current_app.config['JAMF_PRO_URL']}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    headers = {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml",
+        "Authorization": f"Bearer {current_app.config['AUTH_TOKEN']}"
+    }
 
     data = """
     <?xml version="1.0" encoding="UTF-8"?>
@@ -273,9 +277,12 @@ def unscope_profile(profile_id):
 </os_x_configuration_profile>
     """
 
-    # Send API request to unscope profile
-    # You can use your preferred method for sending API requests (e.g., requests library)
-    # Make sure to handle any authentication required by Jamf Pro API
+    response = requests.put(url, headers=headers, data=data)
+
+    if response.status_code in [200, 201]:
+        print(f"Successfully unscoped profile with ID {profile_id}.")
+    else:
+        print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
 def cleanup_expired_profiles(app):
     with app.app_context():
