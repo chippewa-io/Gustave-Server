@@ -332,7 +332,6 @@ def move_profiles(scoped_profile_ids):
         return
 
 
-
 def cleanup_expired_profiles(app):
     with app.app_context():
         # Get the computer IDs from the secret_table where the expiration has passed
@@ -340,7 +339,7 @@ def cleanup_expired_profiles(app):
 
         # Query the active_profile table for profile IDs scoped to those computer IDs
         scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
-        
+
         # Move profiles from active_profiles to expired_profiles
         move_profiles(scoped_profile_ids)
 
