@@ -2,6 +2,7 @@ import requests
 import datetime
 import secrets
 import subprocess
+import time
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from flaskext.mysql import MySQL
@@ -155,23 +156,142 @@ def check_for_expired_secrets():
     conn.close()
 
 ##New Function: 
-def insert_into_active_profiles():
-    # Create a new Flask application instance
+# def insert_into_active_profiles():
+#     # Create a new Flask application instance
+#     app = Flask(__name__)
+#     app.config.from_object(config.DevelopmentConfig)
+
+#     # Get MySQL connection details from config
+#     user = app.config['MYSQL_DATABASE_USER']
+#     password = app.config['MYSQL_DATABASE_PASSWORD']
+#     host = app.config['MYSQL_DATABASE_HOST']
+#     database = app.config['MYSQL_DATABASE_DB']
+
+#     # Connect to MySQL
+#     conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
+#     cursor = conn.cursor()
+#     query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
+#     values = (90, 170)  # Replace with the actual values you want to insert
+#     cursor.execute(query, values)
+#     conn.commit()
+#     cursor.close()
+#     conn.close()
+
+###New Functions
+def get_expired_computer_ids():
     app = Flask(__name__)
-    app.config.from_object(config.DevelopmentConfig)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
 
-    # Get MySQL connection details from config
-    user = app.config['MYSQL_DATABASE_USER']
-    password = app.config['MYSQL_DATABASE_PASSWORD']
-    host = app.config['MYSQL_DATABASE_HOST']
-    database = app.config['MYSQL_DATABASE_DB']
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql_connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
 
-    # Connect to MySQL
-    conn = mysql_connector.connect(user=user, password=password, host=host, database=database)
-    cursor = conn.cursor()
-    query = "INSERT INTO active_profiles (profile_id, computer_id) VALUES (%s, %s)"
-    values = (90, 170)  # Replace with the actual values you want to insert
-    cursor.execute(query, values)
-    conn.commit()
-    cursor.close()
-    conn.close()
+        # Get current timestamp
+        current_time = int(time.time())
+
+        # Query the secret_table for computer IDs with expired secrets
+        query = f"SELECT computer_id FROM secret_table WHERE expiration < {current_time}"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # Close database connection
+        conn.close()
+
+        # Extract the computer IDs from the query result
+        expired_computer_ids = [row[0] for row in result]
+
+        return expired_computer_ids
+
+def get_scoped_profile_ids(computer_ids):
+    app = Flask(__name__)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
+
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql_connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
+
+        # Query the active_profiles table for profile IDs scoped to the given computer IDs
+        computer_ids_str = ', '.join(str(computer_id) for computer_id in computer_ids)
+        query = f"SELECT profile_id FROM active_profiles WHERE computer_id IN ({computer_ids_str})"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # Close database connection
+        conn.close()
+
+        # Extract the profile IDs from the query result
+        scoped_profile_ids = [row[0] for row in result]
+
+        return scoped_profile_ids
+
+def unscope_profile(profile_id):
+    token = generate_jamf_pro_token()
+    url = f"{current_app.config['JAMF_PRO_URL']}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    headers = {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml",
+        "Authorization": f"Bearer {token}"
+    }
+
+    data = """
+<os_x_configuration_profile>
+    <scope>
+        <all_computers>false</all_computers>
+        <all_jss_users>false</all_jss_users>
+        <buildings/>
+        <departments/>
+        <computer_groups/>
+        <jss_users/>
+        <jss_user_groups/>
+        <limitations>
+            <users/>
+            <user_groups/>
+            <network_segments/>
+            <ibeacons/>
+        </limitations>
+        <exclusions>
+            <computers/>
+            <buildings/>
+            <departments/>
+            <computer_groups/>
+            <users/>
+            <user_groups/>
+            <network_segments/>
+            <ibeacons/>
+            <jss_users/>
+            <jss_user_groups/>
+        </exclusions>
+    </scope>
+</os_x_configuration_profile>
+    """
+
+    response = requests.put(url, headers=headers, data=data)
+
+    if response.status_code in [200, 201]:
+        print(f"Successfully unscoped profile with ID {profile_id}.")
+    else:
+        print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
+
+def cleanup_expired_profiles(app):
+    with app.app_context():
+        # Get the computer IDs from the secret_table where the expiration has passed
+        expired_computer_ids = get_expired_computer_ids()
+
+        # Query the active_profile table for profile IDs scoped to those computer IDs
+        scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+
+        # Unscope profiles
+        for profile_id in scoped_profile_ids:
+            unscope_profile(profile_id)

@@ -16,7 +16,7 @@ class Config:
     PROFILE_DESCRIPTION = "This profile is used on the backend of your system.  Please ignore this."
 
 class DevelopmentConfig(Config):
-    pass
+    CONFIG_CLASS = 'config.DevelopmentConfig'
 
 class ProductionConfig(Config):
     pass

@@ -7,7 +7,7 @@ from routes.computers import computers_bp
 from routes.token_generation import token_generation_bp
 from routes.secret import secrets_bp
 # Import init_db function
-from services import init_db, insert_into_active_profiles
+from services import init_db, cleanup_expired_profiles
 
 # Create app
 def create_app(config_class=config.DevelopmentConfig):
@@ -21,7 +21,7 @@ def create_app(config_class=config.DevelopmentConfig):
     scheduler.init_app(app)
     scheduler.start()
     # Add a job that runs every 10 seconds
-    scheduler.add_job(func=insert_into_active_profiles, trigger='interval', seconds=10, id='insert_into_active_profiles')
+    scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', seconds=10, id='cleanup_expired_profiles', args=(app,))
     # Register the blueprints
     app.register_blueprint(computers_bp, url_prefix='/api')
     app.register_blueprint(token_generation_bp, url_prefix='/api')
