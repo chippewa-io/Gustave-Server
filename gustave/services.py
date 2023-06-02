@@ -31,10 +31,13 @@ def store_secret(udid, computer_id, secret):
 
     query = "INSERT INTO secret_table (udid, computer_id, secret, expiration) VALUES (%s, %s, %s, %s)"
     values = (udid, computer_id, secret, expiration_timestamp)
-
-    cursor.execute(query, values)
-    conn.commit()
-    cursor.close()
+    try:
+        cursor.execute(query, values)
+        conn.commit()
+        cursor.close()
+    except mysql_connector.Error as e:
+        current_app.logger.error('Failed to store secret in database: %s', e)
+        return None
 
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
