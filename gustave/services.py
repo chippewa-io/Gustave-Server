@@ -212,6 +212,8 @@ def get_expired_computer_ids():
         return expired_computer_ids
 
 def get_scoped_profile_ids(computer_ids):
+    if not computer_ids:
+        return []
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
 
