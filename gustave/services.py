@@ -241,17 +241,36 @@ def unscope_profile(profile_id):
     headers = {"Accept": "application/json"}
 
     data = """
-    <os_x_configuration_profile>
-        <scope>
-            <all_computers>false</all_computers>
-            <all_jss_users>false</all_jss_users>
+    <?xml version="1.0" encoding="UTF-8"?>
+<os_x_configuration_profile>
+    <scope>
+        <all_computers>false</all_computers>
+        <all_jss_users>false</all_jss_users>
+        <buildings/>
+        <departments/>
+        <computer_groups/>
+        <jss_users/>
+        <jss_user_groups/>
+        <limitations>
+            <users/>
+            <user_groups/>
+            <network_segments/>
+            <ibeacons/>
+        </limitations>
+        <exclusions>
+            <computers/>
             <buildings/>
             <departments/>
             <computer_groups/>
+            <users/>
+            <user_groups/>
+            <network_segments/>
+            <ibeacons/>
             <jss_users/>
             <jss_user_groups/>
-        </scope>
-    </os_x_configuration_profile>
+        </exclusions>
+    </scope>
+</os_x_configuration_profile>
     """
 
     # Send API request to unscope profile
