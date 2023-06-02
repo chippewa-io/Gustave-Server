@@ -285,7 +285,7 @@ def unscope_profile(profile_id):
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
-def move_profiles(scoped_profile_ids):
+def move_profiles(profile_id):
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
 
@@ -303,28 +303,24 @@ def move_profiles(scoped_profile_ids):
             # Start a transaction
             conn.start_transaction()
 
-            # Query the active_profiles table for profile IDs scoped to the given profile IDs
-            if scoped_profile_ids:
-                scoped_profile_ids_str = ', '.join(str(profile_id) for profile_id in scoped_profile_ids)
-                query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id IN ({scoped_profile_ids_str})"
-                cursor = conn.cursor()
-                cursor.execute(query)
-                result = cursor.fetchall()
+            # Query the active_profiles table for the given profile ID
+            query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
+            cursor = conn.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
 
-                # Move records to the expired_profiles table
-                for row in result:
-                    profile_id, computer_id = row
-                    insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
-                    cursor.execute(insert_query)
+            # Move records to the expired_profiles table
+            for row in result:
+                profile_id, computer_id = row
+                insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+                cursor.execute(insert_query)
 
-                # Delete records from the active_profiles table
-                delete_query = f"DELETE FROM active_profiles WHERE profile_id IN ({scoped_profile_ids_str})"
-                cursor.execute(delete_query)
+            # Delete records from the active_profiles table
+            delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
+            cursor.execute(delete_query)
 
-                # Commit the transaction
-                conn.commit()
-            else:
-                print(f"No profiles to be deleted")
+            # Commit the transaction
+            conn.commit()
         except Exception as e:
             # Rollback the transaction in case of any errors
             conn.rollback()
