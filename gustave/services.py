@@ -285,7 +285,7 @@ def unscope_profile(profile_id):
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
-def move_profiles(profile_id):
+def move_profiles(scoped_profile_ids):
     app = Flask(__name__)
     app.config.from_object(current_app.config['CONFIG_CLASS'])
 
