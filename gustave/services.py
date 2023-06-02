@@ -281,8 +281,55 @@ def unscope_profile(profile_id):
 
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
+        move_profiles(profile_id)
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
+
+def move_profiles(profile_id):
+    app = Flask(__name__)
+    app.config.from_object(current_app.config['CONFIG_CLASS'])
+
+    with app.app_context():
+        # Connect to MySQL database
+        conn = mysql_connector.connect(
+            user=app.config['MYSQL_DATABASE_USER'],
+            password=app.config['MYSQL_DATABASE_PASSWORD'],
+            host=app.config['MYSQL_DATABASE_HOST'],
+            database=app.config['MYSQL_DATABASE_DB']
+        )
+
+        # Move records from active_profiles to expired_profiles
+        try:
+            # Start a transaction
+            conn.start_transaction()
+
+            # Query the active_profiles table for the given profile ID
+            query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
+            cursor = conn.cursor()
+            cursor.execute(query)
+            result = cursor.fetchall()
+
+            # Move records to the expired_profiles table
+            for row in result:
+                profile_id, computer_id = row
+                insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+                cursor.execute(insert_query)
+
+            # Delete records from the active_profiles table
+            delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
+            cursor.execute(delete_query)
+
+            # Commit the transaction
+            conn.commit()
+        except Exception as e:
+            # Rollback the transaction in case of any errors
+            conn.rollback()
+            raise e
+        finally:
+            # Close database connection
+            conn.close()
+
+        return
 
 def cleanup_expired_profiles(app):
     with app.app_context():
