@@ -22,7 +22,7 @@ configProfileXML="<os_x_configuration_profile>
            <id>$6</id>
          </category>
         <distribution_method>Install Automatically</distribution_method>
-        <user_removable>false</user_removable>
+        <user_removable>true</user_removable>
         <level>computer</level>
         <redeploy_on_update>Newly Assigned</redeploy_on_update>
         <payloads>$payloadXML</payloads>
