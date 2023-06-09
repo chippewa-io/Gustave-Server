@@ -2,6 +2,8 @@
 from flask import Flask
 import config
 from flask_apscheduler import APScheduler
+from waitress import serve
+import os
 # Import blueprints
 from routes.computers import computers_bp
 from routes.token_generation import token_generation_bp
@@ -31,4 +33,7 @@ def create_app(config_class=config.DevelopmentConfig):
 
 if __name__ == '__main__':
     app = create_app(config_class=config.DevelopmentConfig)
-    app.run(debug=True)
+    if os.environ.get('USE_WAITRESS') == 'true':
+        serve(app, host='127.0.0.1', port=8000)
+    else:
+        app.run(host='127.0.0.1', port=8000, debug=True)
