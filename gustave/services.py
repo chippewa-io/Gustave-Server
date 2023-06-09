@@ -35,6 +35,7 @@ def store_secret(udid, computer_id, secret):
         cursor.execute(query, values)
         conn.commit()
         cursor.close()
+        return expiration_timestamp
     except mysql_connector.Error as e:
         current_app.logger.error('Failed to store secret in database: %s', e)
         return None
@@ -98,13 +99,14 @@ def extract_profile_id(xml_string):
     profile_id = root.find('id').text
     return profile_id
 
-def create_and_scope_profile(computer_id, secret, category_id, profile_name):
+def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
     jamfProURL = current_app.config['JAMF_PRO_URL']
     jamfProUser = current_app.config['JAMF_PRO_USERNAME']
     jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}"'
+    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{expiration}" "{category_id}" "{computer_id}"'
+
 
     try:
         # Execute the command
