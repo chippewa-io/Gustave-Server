@@ -95,9 +95,15 @@ def generate_jamf_pro_token():
         raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
 
 def extract_profile_id(xml_string):
-    root = ET.fromstring(xml_string)
-    profile_id = root.find('id').text
-    return profile_id
+    # Try to parse the XML string
+    try:
+        root = ET.fromstring(xml_string)
+        profile_id = root.find('id').text
+        return profile_id
+    except ET.ParseError:
+        print(f"Yo, we've got an XML parsing error. Check out this XML string:\n{xml_string}")
+        return None
+
 
 def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
     jamfProURL = current_app.config['JAMF_PRO_URL']
