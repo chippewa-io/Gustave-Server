@@ -110,7 +110,6 @@ class GustaveService {
 
 
     func getTokenFromGustave() {
-        let defaults = UserDefaults.standard
         let regex = try! NSRegularExpression(pattern: "^[a-fA-F0-9]{32}$", options: [])
         let maxAttempts = getTimeoutFromPlist()
 
