@@ -19,12 +19,12 @@ def new_secret():
         secret = generate_secret()
 
         # Step 3: Store secret, udid, computer_id, and expiration date in the database
-        store_secret(udid, computer_id, secret)
+        expiration = store_secret(udid, computer_id, secret)
 
         # Step 4: Create and scope a configuration profile in Jamf Pro
         profile_name = f"Computer ID {computer_id}"
         category_id = current_app.config['CATEGORY_ID']
-        create_and_scope_profile(computer_id, secret, category_id, profile_name)
+        create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name)
 
         return jsonify({'success': True})
 
