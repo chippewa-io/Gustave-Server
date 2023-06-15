@@ -359,18 +359,24 @@ def cleanup_expired_profiles(app):
         # Query the active_profile table for profile IDs scoped to those computer IDs
         scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-        # Unscope profiles
+        # Unscope and delete profiles
         for profile_id in scoped_profile_ids:
             # Check if the profile still exists in Jamf Pro
             existing_profile = check_for_existing_profile(profile_id)
-        
-            # If the profile doesn't exist, skip to the next profile
-            if not existing_profile:
-                continue
 
-            # If the profile does exist, proceed with unscoping it
-            unscope_profile(profile_id)
+            if existing_profile:
+                # Unscope the profile
+                unscope_profile(profile_id)
 
+                # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+                time.sleep(10)
+
+                # Delete the profile
+                delete_profile(profile_id)
+            else:
+                # The profile doesn't exist, so we assume it has already been deleted
+                # You may log a message or take appropriate action here if needed
+                pass
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
