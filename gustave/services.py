@@ -371,7 +371,7 @@ def cleanup_expired_profiles(app):
         scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
         # Unscope and delete profiles
-        for profile_id in scoped_profile_ids:
+        for profile_id in scoped_profile_ids[:]:
             # Check if the profile still exists in Jamf Pro
             logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
             existing_profile = check_for_existing_profile_id(profile_id)
