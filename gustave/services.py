@@ -362,6 +362,7 @@ def move_profiles(profile_id):
         return
 
 cleanup_lock = Lock()
+processed_profiles = set()
 
 def cleanup_expired_profiles(app):
     import logging
@@ -370,15 +371,15 @@ def cleanup_expired_profiles(app):
     with app.app_context():
         # Acquire the lock
         if cleanup_lock.acquire(blocking=False):
-            try:
-                # Get the computer IDs from the secret_table where the expiration has passed
-                expired_computer_ids = get_expired_computer_ids()
+            # Get the computer IDs from the secret_table where the expiration has passed
+            expired_computer_ids = get_expired_computer_ids()
 
-                # Query the active_profile table for profile IDs scoped to those computer IDs
-                scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+            # Query the active_profile table for profile IDs scoped to those computer IDs
+            scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-                # Unscope and delete profiles
-                for profile_id in scoped_profile_ids[:]:
+            # Unscope and delete profiles
+            for profile_id in scoped_profile_ids[:]:
+                if profile_id not in processed_profiles:
                     # Check if the profile still exists in Jamf Pro
                     logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
                     existing_profile = check_for_existing_profile_id(profile_id)
@@ -394,16 +395,17 @@ def cleanup_expired_profiles(app):
                         # Delete the profile
                         delete_profile(profile_id)
                         logger.info(f"deleted profile {profile_id} in Jamf Pro...")
+
+                        # Add the processed profile ID to the set
+                        processed_profiles.add(profile_id)
                     else:
                         # The profile doesn't exist, so we assume it has already been deleted
                         logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
                         # You may log a message or take appropriate action here if needed
                         pass
-            finally:
-                # Release the lock
-                cleanup_lock.release()
-        else:
-            app.logger.info("cleanup_expired_profiles job is already running")
+
+            # Release the lock
+            cleanup_lock.release()
 
 
 def check_for_existing_profile(profile_name):
