@@ -299,8 +299,8 @@ def unscope_profile(profile_id):
         print(f"Successfully unscoped profile with ID {profile_id}.")
         move_profiles(profile_id)
 
-          # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
-                time.sleep(10)
+        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+        time.sleep(10)
 
         # Additional DELETE request
         delete_response = requests.delete(url, headers=headers)
