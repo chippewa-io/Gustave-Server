@@ -4,13 +4,15 @@ import secrets
 import subprocess
 import time
 import logging
+import gustave.config as config
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
+from threading import Lock
 from flaskext.mysql import MySQL
 from flask import current_app
 from config import Config
 from flask import Flask
-import gustave.config as config
+
 
 
 ##loging stuff
@@ -359,40 +361,50 @@ def move_profiles(profile_id):
 
         return
 
+cleanup_lock = Lock()
+
 def cleanup_expired_profiles(app):
     import logging
     logger = logging.getLogger(__name__)
     app.logger.info("cleanup_expired_profiles job triggered")
     with app.app_context():
-        # Get the computer IDs from the secret_table where the expiration has passed
-        expired_computer_ids = get_expired_computer_ids()
+        # Acquire the lock
+        if cleanup_lock.acquire(blocking=False):
+            try:
+                # Get the computer IDs from the secret_table where the expiration has passed
+                expired_computer_ids = get_expired_computer_ids()
 
-        # Query the active_profile table for profile IDs scoped to those computer IDs
-        scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+                # Query the active_profile table for profile IDs scoped to those computer IDs
+                scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-        # Unscope and delete profiles
-        for profile_id in scoped_profile_ids[:]:
-            # Check if the profile still exists in Jamf Pro
-            logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
-            existing_profile = check_for_existing_profile_id(profile_id)
+                # Unscope and delete profiles
+                for profile_id in scoped_profile_ids[:]:
+                    # Check if the profile still exists in Jamf Pro
+                    logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
+                    existing_profile = check_for_existing_profile_id(profile_id)
 
-            if existing_profile:
-                # Unscope the profile
-                logger.info(f"found profile {profile_id} in Jamf Pro...")
+                    if existing_profile:
+                        # Unscope the profile
+                        logger.info(f"found profile {profile_id} in Jamf Pro...")
+                        unscope_profile(profile_id)
+                        logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
+                        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+                        time.sleep(10)
 
-                unscope_profile(profile_id)
-                logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
-                # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
-                time.sleep(10)
+                        # Delete the profile
+                        delete_profile(profile_id)
+                        logger.info(f"deleted profile {profile_id} in Jamf Pro...")
+                    else:
+                        # The profile doesn't exist, so we assume it has already been deleted
+                        logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
+                        # You may log a message or take appropriate action here if needed
+                        pass
+            finally:
+                # Release the lock
+                cleanup_lock.release()
+        else:
+            app.logger.info("cleanup_expired_profiles job is already running")
 
-                # Delete the profile
-                delete_profile(profile_id)
-                logger.info(f"deleted profile {profile_id} in Jamf Pro...")
-            else:
-                # The profile doesn't exist, so we assume it has already been deleted
-                logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
-                # You may log a message or take appropriate action here if needed
-                pass
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
