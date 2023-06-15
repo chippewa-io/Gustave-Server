@@ -358,6 +358,7 @@ def move_profiles(profile_id):
 
 def cleanup_expired_profiles(app):
     import logging
+    logger = logging.getLogger(__name__)
     logger.info("Checking for expired profiles...")
     with app.app_context():
         # Get the computer IDs from the secret_table where the expiration has passed
