@@ -61,6 +61,10 @@ def get_computer_id(udid):
         error_message = f"Failed to retrieve computer ID. Status code: {response.status_code}"
         raise Exception(error_message)
 
+def generate_secret():
+    secret = secrets.token_hex(16)
+    return secret
+
 def generate_token_hash():
     token = secrets.token_hex(32)
     return token
