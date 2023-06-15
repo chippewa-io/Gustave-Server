@@ -113,6 +113,11 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     # Command to execute the bash script with the provided arguments
     command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{expiration}" "{category_id}" "{computer_id}"'
 
+    existing_profile = check_for_existing_profile(profile_name)
+    if existing_profile:
+        # If a profile with the same name already exists, return a message indicating this
+        return jsonify({'message': 'A profile with this name already exists in Jamf Pro'})
+
 
     try:
         # Execute the command
@@ -357,3 +362,53 @@ def cleanup_expired_profiles(app):
         # Unscope profiles
         for profile_id in scoped_profile_ids:
             unscope_profile(profile_id)
+
+def check_for_existing_profile(profile_name):
+    # The base URL for the Jamf Pro API
+    base_url = current_app.config['JAMF_PRO_URL']
+
+    # The endpoint for getting configuration profiles
+    endpoint = '/JSSResource/osxconfigurationprofiles'
+
+    # The full URL for the API request
+    url = base_url + endpoint
+
+    # The headers for the API request
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {generate_jamf_pro_token()}'
+    }
+
+    # Send a GET request to the Jamf Pro API
+    response = requests.get(url, headers=headers)
+
+    # If the request was successful
+    if response.status_code == 200:
+        # Parse the JSON response
+        data = response.json()
+
+        # Loop through each profile in the response
+        for profile in data['os_x_configuration_profiles']:
+            # If the profile's name matches the given profile name
+            if profile['name'] == profile_name:
+                # Return the profile
+                return profile
+
+    # If the request was not successful, or if no matching profile was found, return None
+    return None
+
+def get_secret_expiration(secret):
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+
+    query = "SELECT expiration FROM secret_table WHERE secret = %s"
+    values = (secret,)
+    cursor.execute(query, values)
+    result = cursor.fetchone()
+
+    cursor.close()
+
+    if result:
+        return {'expiration': result[0]}
+    else:
+        return None

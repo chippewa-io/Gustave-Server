@@ -29,3 +29,15 @@ def new_secret():
         return jsonify({'success': True})
 
     return jsonify({'error': 'Failed to generate secret'})
+
+@secrets_bp.route('/secret/expiration', methods=['GET'])
+def obtain_expiration():
+    secret = request.args.get('secret')
+
+    # Retrieve the expiration date for the provided secret
+    expiration_info = get_secret_expiration(secret)
+    if expiration_info:
+        expiration_date = expiration_info['expiration']
+        return jsonify({'expiration_date': expiration_date})
+    else:
+        return jsonify({'message': 'Secret not found or expired'})
