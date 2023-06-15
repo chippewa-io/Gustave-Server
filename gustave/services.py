@@ -3,6 +3,7 @@ import datetime
 import secrets
 import subprocess
 import time
+import logging
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from flaskext.mysql import MySQL
@@ -11,6 +12,10 @@ from config import Config
 from flask import Flask
 import gustave.config as config
 
+
+##loging stuff
+
+logging.basicConfig(level=logging.INFO)
 
 
 #MySQL Connection
@@ -352,7 +357,7 @@ def move_profiles(profile_id):
         return
 
 def cleanup_expired_profiles(app):
-    print ("checking for expired profiles...")
+    logger.info("Checking for expired profiles...")
     with app.app_context():
         # Get the computer IDs from the secret_table where the expiration has passed
         expired_computer_ids = get_expired_computer_ids()
