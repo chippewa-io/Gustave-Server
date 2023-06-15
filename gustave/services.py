@@ -370,19 +370,24 @@ def cleanup_expired_profiles(app):
         # Unscope and delete profiles
         for profile_id in scoped_profile_ids:
             # Check if the profile still exists in Jamf Pro
+            logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
             existing_profile = check_for_existing_profile(profile_id)
 
             if existing_profile:
                 # Unscope the profile
-                unscope_profile(profile_id)
+                logger.info(f"found profile {profile_id} in Jamf Pro...")
 
+                unscope_profile(profile_id)
+                logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
                 # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
                 time.sleep(10)
 
                 # Delete the profile
                 delete_profile(profile_id)
+                logger.info(f"deleted profile {profile_id} in Jamf Pro...")
             else:
                 # The profile doesn't exist, so we assume it has already been deleted
+                logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
                 # You may log a message or take appropriate action here if needed
                 pass
 
