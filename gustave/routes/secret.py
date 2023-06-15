@@ -27,7 +27,7 @@ def new_secret():
         category_id = current_app.config['CATEGORY_ID']
 
         # Create and scope a configuration profile in Jamf Pro
-        result = create_and_scope_profile(computer_id, secret, category_id, profile_name)
+        result = create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name)
 
         # If a profile with the same name already exists
         if 'error' in result:
