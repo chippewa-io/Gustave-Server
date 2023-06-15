@@ -309,8 +309,10 @@ def unscope_profile(profile_id):
 
         if delete_response.status_code == 200:
             print(f"Successfully deleted profile with ID {profile_id}.")
+        elif response.status_code == 404:
+            print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
         else:
-            print(f"Failed to delete profile with ID {profile_id}. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+            print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
