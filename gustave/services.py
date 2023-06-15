@@ -116,7 +116,7 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     existing_profile = check_for_existing_profile(profile_name)
     if existing_profile:
         # If a profile with the same name already exists, return a message indicating this
-        return jsonify({'message': 'A profile with this name already exists in Jamf Pro'})
+        return {'error': 'A profile with this name already exists in Jamf Pro'}
 
 
     try:

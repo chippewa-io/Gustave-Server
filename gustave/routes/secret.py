@@ -11,6 +11,7 @@ def new_secret():
     existing_secret = get_secret(udid)
     if existing_secret and existing_secret['expiration'] > time.time():
         return jsonify({'message': 'A secret already exists for this computer'})
+    
     # Step 1: Fetch the Computer ID from Jamf Pro using the UDID
     computer_id = get_computer_id(udid)
 
@@ -24,11 +25,19 @@ def new_secret():
         # Step 4: Create and scope a configuration profile in Jamf Pro
         profile_name = f"Computer ID {computer_id}"
         category_id = current_app.config['CATEGORY_ID']
-        create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name)
+
+        # Create and scope a configuration profile in Jamf Pro
+        result = create_and_scope_profile(computer_id, secret, category_id, profile_name)
+
+        # If a profile with the same name already exists
+        if 'error' in result:
+            # Return a JSON response indicating that a profile with this name already exists
+            return jsonify(result)
 
         return jsonify({'success': True})
 
     return jsonify({'error': 'Failed to generate secret'})
+
 
 @secrets_bp.route('/secret/expiration', methods=['GET'])
 def obtain_expiration():
