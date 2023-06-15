@@ -13,10 +13,7 @@ from flask import current_app
 from config import Config
 from flask import Flask
 
-
-
-##loging stuff
-
+##loging
 logging.basicConfig(level=logging.INFO)
 
 
@@ -63,10 +60,6 @@ def get_computer_id(udid):
     else:
         error_message = f"Failed to retrieve computer ID. Status code: {response.status_code}"
         raise Exception(error_message)
-
-def generate_secret():
-    secret = secrets.token_hex(16)
-    return secret
 
 def generate_token_hash():
     token = secrets.token_hex(32)
