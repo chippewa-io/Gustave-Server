@@ -105,13 +105,13 @@ def extract_profile_id(xml_string):
         return None
 
 
-def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
+def create_and_scope_profile(computer_id, secret, category_id, profile_name):
     jamfProURL = current_app.config['JAMF_PRO_URL']
     jamfProUser = current_app.config['JAMF_PRO_USERNAME']
     jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{expiration}" "{category_id}" "{computer_id}"'
+    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}"'
 
     existing_profile = check_for_existing_profile(profile_name)
     if existing_profile:
