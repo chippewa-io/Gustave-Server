@@ -65,9 +65,6 @@ def generate_secret():
     secret = secrets.token_hex(16)
     return secret
 
-def generate_token_hash():
-    token = secrets.token_hex(32)
-    return token
 
 def get_secret(udid):
     conn = mysql.get_db()
