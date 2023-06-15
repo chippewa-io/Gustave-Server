@@ -24,8 +24,8 @@ def create_app(config_class=config.DevelopmentConfig):
     
     # Add a job that runs every X minutes
     if not scheduler.running:
-    scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', minutes=2, id='cleanup_expired_profiles', args=(app,))
-    scheduler.start()
+        scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', minutes=2, id='cleanup_expired_profiles', args=(app,))
+        scheduler.start()
     # Register the blueprints
     app.register_blueprint(computers_bp, url_prefix='/api')
     app.register_blueprint(token_generation_bp, url_prefix='/api')
