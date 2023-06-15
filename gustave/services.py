@@ -361,7 +361,16 @@ def cleanup_expired_profiles(app):
 
         # Unscope profiles
         for profile_id in scoped_profile_ids:
+            # Check if the profile still exists in Jamf Pro
+            existing_profile = check_for_existing_profile(profile_id)
+        
+            # If the profile doesn't exist, skip to the next profile
+            if not existing_profile:
+                continue
+
+            # If the profile does exist, proceed with unscoping it
             unscope_profile(profile_id)
+
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
