@@ -371,7 +371,7 @@ def cleanup_expired_profiles(app):
         for profile_id in scoped_profile_ids:
             # Check if the profile still exists in Jamf Pro
             logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
-            existing_profile = check_for_existing_profile(profile_id)
+            existing_profile = check_for_existing_profile_id(profile_id)
 
             if existing_profile:
                 # Unscope the profile
@@ -440,3 +440,29 @@ def get_secret_expiration(secret):
         return {'expiration': result[0]}
     else:
         return None
+
+def check_for_existing_profile_id(profile_id):
+    # The base URL for the Jamf Pro API
+    base_url = current_app.config['JAMF_PRO_URL']
+
+    # The endpoint for getting configuration profiles
+    endpoint = f'/JSSResource/osxconfigurationprofiles/id/{profile_id}'
+
+    # The full URL for the API request
+    url = base_url + endpoint
+
+    # The headers for the API request
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {generate_jamf_pro_token()}'
+    }
+
+    # Send a GET request to the Jamf Pro API
+    response = requests.get(url, headers=headers)
+
+    # If the request was successful and the profile exists
+    if response.status_code == 200:
+        return True
+
+    # If the request was not successful or the profile does not exist
+    return False
