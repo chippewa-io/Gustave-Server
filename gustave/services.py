@@ -105,7 +105,7 @@ def extract_profile_id(xml_string):
         return None
 
 
-def create_and_scope_profile(computer_id, secret, category_id, profile_name):
+def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
     jamfProURL = current_app.config['JAMF_PRO_URL']
     jamfProUser = current_app.config['JAMF_PRO_USERNAME']
     jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
