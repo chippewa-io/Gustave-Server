@@ -3,14 +3,18 @@ import datetime
 import secrets
 import subprocess
 import time
+import logging
+import gustave.config as config
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
+from threading import Lock
 from flaskext.mysql import MySQL
 from flask import current_app
 from config import Config
 from flask import Flask
-import gustave.config as config
 
+##loging
+logging.basicConfig(level=logging.INFO)
 
 
 #MySQL Connection
@@ -61,9 +65,6 @@ def generate_secret():
     secret = secrets.token_hex(16)
     return secret
 
-def generate_token_hash():
-    token = secrets.token_hex(32)
-    return token
 
 def get_secret(udid):
     conn = mysql.get_db()
@@ -111,7 +112,12 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{expiration}" "{category_id}" "{computer_id}"'
+    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}"'
+
+    existing_profile = check_for_existing_profile(profile_name)
+    if existing_profile:
+        # If a profile with the same name already exists, return a message indicating this
+        return {'error': 'A profile with this name already exists in Jamf Pro'}
 
 
     try:
@@ -289,13 +295,18 @@ def unscope_profile(profile_id):
         print(f"Successfully unscoped profile with ID {profile_id}.")
         move_profiles(profile_id)
 
+        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+        time.sleep(10)
+
         # Additional DELETE request
         delete_response = requests.delete(url, headers=headers)
 
         if delete_response.status_code == 200:
             print(f"Successfully deleted profile with ID {profile_id}.")
+        elif response.status_code == 404:
+            print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
         else:
-            print(f"Failed to delete profile with ID {profile_id}. Status code: {delete_response.status_code}, Response: {delete_response.text}")
+            print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
@@ -346,14 +357,125 @@ def move_profiles(profile_id):
 
         return
 
+cleanup_lock = Lock()
+processed_profiles = set()
+
 def cleanup_expired_profiles(app):
+    import logging
+    logger = logging.getLogger(__name__)
+    app.logger.info("cleanup_expired_profiles job triggered")
     with app.app_context():
-        # Get the computer IDs from the secret_table where the expiration has passed
-        expired_computer_ids = get_expired_computer_ids()
+        # Acquire the lock
+        if cleanup_lock.acquire(blocking=False):
+            # Get the computer IDs from the secret_table where the expiration has passed
+            expired_computer_ids = get_expired_computer_ids()
 
-        # Query the active_profile table for profile IDs scoped to those computer IDs
-        scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+            # Query the active_profile table for profile IDs scoped to those computer IDs
+            scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-        # Unscope profiles
-        for profile_id in scoped_profile_ids:
-            unscope_profile(profile_id)
+            # Unscope and delete profiles
+            for profile_id in scoped_profile_ids[:]:
+                if profile_id not in processed_profiles:
+                    # Check if the profile still exists in Jamf Pro
+                    logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
+                    existing_profile = check_for_existing_profile_id(profile_id)
+
+                    if existing_profile:
+                        # Unscope the profile
+                        logger.info(f"found profile {profile_id} in Jamf Pro...")
+                        unscope_profile(profile_id)
+                        logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
+                        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+                        time.sleep(10)
+
+                        # Delete the profile
+                        delete_profile(profile_id)
+                        logger.info(f"deleted profile {profile_id} in Jamf Pro...")
+
+                        # Add the processed profile ID to the set
+                        processed_profiles.add(profile_id)
+                    else:
+                        # The profile doesn't exist, so we assume it has already been deleted
+                        logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
+                        # You may log a message or take appropriate action here if needed
+                        pass
+
+            # Release the lock
+            cleanup_lock.release()
+
+
+def check_for_existing_profile(profile_name):
+    # The base URL for the Jamf Pro API
+    base_url = current_app.config['JAMF_PRO_URL']
+
+    # The endpoint for getting configuration profiles
+    endpoint = '/JSSResource/osxconfigurationprofiles'
+
+    # The full URL for the API request
+    url = base_url + endpoint
+
+    # The headers for the API request
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {generate_jamf_pro_token()}'
+    }
+
+    # Send a GET request to the Jamf Pro API
+    response = requests.get(url, headers=headers)
+
+    # If the request was successful
+    if response.status_code == 200:
+        # Parse the JSON response
+        data = response.json()
+
+        # Loop through each profile in the response
+        for profile in data['os_x_configuration_profiles']:
+            # If the profile's name matches the given profile name
+            if profile['name'] == profile_name:
+                # Return the profile
+                return profile
+
+    # If the request was not successful, or if no matching profile was found, return None
+    return None
+
+def get_secret_expiration(secret):
+    conn = mysql.get_db()
+    cursor = conn.cursor()
+
+    query = "SELECT expiration FROM secret_table WHERE secret = %s"
+    values = (secret,)
+    cursor.execute(query, values)
+    result = cursor.fetchone()
+
+    cursor.close()
+
+    if result:
+        return {'expiration': result[0]}
+    else:
+        return None
+
+def check_for_existing_profile_id(profile_id):
+    # The base URL for the Jamf Pro API
+    base_url = current_app.config['JAMF_PRO_URL']
+
+    # The endpoint for getting configuration profiles
+    endpoint = f'/JSSResource/osxconfigurationprofiles/id/{profile_id}'
+
+    # The full URL for the API request
+    url = base_url + endpoint
+
+    # The headers for the API request
+    headers = {
+        'Accept': 'application/json',
+        'Authorization': f'Bearer {generate_jamf_pro_token()}'
+    }
+
+    # Send a GET request to the Jamf Pro API
+    response = requests.get(url, headers=headers)
+
+    # If the request was successful and the profile exists
+    if response.status_code == 200:
+        return True
+
+    # If the request was not successful or the profile does not exist
+    return False

@@ -2,7 +2,7 @@ class Config:
     """Base configuration."""
     DEBUG = True
     TESTING = True
-    TOKEN_EXPIRATION = 90
+    TOKEN_EXPIRATION = 60 #in seconds
     MYSQL_DATABASE_HOST = '127.0.0.1'  # change this line
     MYSQL_DATABASE_USER = 'beaver'
     MYSQL_DATABASE_PASSWORD = 'gustave03'
