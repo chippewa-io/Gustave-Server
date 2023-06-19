@@ -9,11 +9,14 @@ import Foundation
 
 func help() {
  let helpText = """
- Usage: gustave [options]
- Options:
- -h, --help Show this help message and exit
- initiate Start the process of generating and storing a new secret
- read Read the stored secret from the database
+ Usage: gustave verb [options]
+
+     verb is one of the following:
+
+     help             Displays this text and instructions on utilizing the gustave binary
+     initiate         This will begin the process of requesting a secret from the gustave server.
+     read             This will retrieve a secret from the database.  This secret can be utilized to query the gustave server.
+
  """
  print(helpText)
 }

@@ -6,6 +6,7 @@
 //
 import Foundation
 import SQLite
+import IOKit
 
 class Services {
     let db = Database()
@@ -18,9 +19,6 @@ class Services {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = "udid=\(udid)".data(using: .utf8)
-        print("hi Tyler...")
-        print("udid=\(udid)")
-        print("url: \(gustaveServerURL)/api/secret")
 
         let semaphore = DispatchSemaphore(value: 0)  // 1. Create a semaphore
 
@@ -36,12 +34,10 @@ class Services {
                 let secret = self.getSecretFromPlist()
                 self.storeSecretInDatabase(secret: secret)
                 self.checkSecretStatus(secret: secret)
-                print("secret: \(secret)")
             } else {
                 print("Failed to generate a secret.")
             }
         }
-        print("task: \(task)")
 
         task.resume()
 

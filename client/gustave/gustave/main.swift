@@ -31,7 +31,7 @@ if getuid() != 0 {
 }
 
 // Print help docs
-if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-h") {
+if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-h") || CommandLine.arguments.contains("help") {
     help()
     exit(0)
 }
