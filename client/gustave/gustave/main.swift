@@ -22,8 +22,18 @@ class Gustave {
     }
 
     func read() {
-        // This is where we will implement the logic to read a secret from the database.
-        print("Reading the secret from the database...")
+        print("Reading the most recent secret from the database...")
+        if let secretData = db.getMostRecentSecret() {
+            let json = """
+            {
+                "secret": "\(secretData.secret)",
+                "expiration": "\(secretData.expiration)"
+            }
+            """
+            print(json)
+        } else {
+            print("No secrets found in the database.")
+        }
     }
 }
 

@@ -43,6 +43,18 @@ class Database {
             print("Cannot create table: \(error)")
         }
     }
+    
+    func getMostRecentSecret() -> (secret: String, expiration: String)? {
+        do {
+            if let row = try db?.pluck(secrets.order(id.desc)) {
+                return (row[secret], row[expiration])
+            }
+        } catch {
+            print("Cannot retrieve secret: \(error)")
+        }
+        return nil
+    }
+
 
     func insertSecret(secret: String, expiration: String) {
         let insert = secrets.insert(self.secret <- secret, self.expiration <- expiration)
