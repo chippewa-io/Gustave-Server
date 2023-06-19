@@ -7,18 +7,19 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		834D0D752A37815D00E33E25 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834D0D742A37815D00E33E25 /* main.swift */; };
-		834D0D7C2A3781EF00E33E25 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834D0D7B2A3781EF00E33E25 /* DatabaseManager.swift */; };
-		834D0D7E2A37821100E33E25 /* GustaveServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834D0D7D2A37821100E33E25 /* GustaveServices.swift */; };
-		834D0D812A37842800E33E25 /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 834D0D802A37842800E33E25 /* SQLite */; };
+		839FA4D82A3CB7FA004F07BC /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FA4D72A3CB7FA004F07BC /* main.swift */; };
+		839FA4E12A3CB8D4004F07BC /* services.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FA4E02A3CB8D4004F07BC /* services.swift */; };
+		839FA4E32A3CB8DD004F07BC /* database.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839FA4E22A3CB8DD004F07BC /* database.swift */; };
+		839FA4E62A3CBAC2004F07BC /* SQLite in Frameworks */ = {isa = PBXBuildFile; productRef = 839FA4E52A3CBAC2004F07BC /* SQLite */; };
+		83E746F22A3CCE16007F4A6B /* Help.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83E746F12A3CCE16007F4A6B /* Help.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		834D0D6F2A37815D00E33E25 /* CopyFiles */ = {
+		839FA4D22A3CB7FA004F07BC /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
-			dstSubfolderSpec = 0;
+			dstPath = "";
+			dstSubfolderSpec = 7;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
@@ -26,46 +27,48 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		834D0D712A37815D00E33E25 /* gustave */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gustave; sourceTree = BUILT_PRODUCTS_DIR; };
-		834D0D742A37815D00E33E25 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
-		834D0D7B2A3781EF00E33E25 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
-		834D0D7D2A37821100E33E25 /* GustaveServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GustaveServices.swift; sourceTree = "<group>"; };
+		839FA4D42A3CB7FA004F07BC /* gustave */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gustave; sourceTree = BUILT_PRODUCTS_DIR; };
+		839FA4D72A3CB7FA004F07BC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		839FA4E02A3CB8D4004F07BC /* services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = services.swift; sourceTree = "<group>"; };
+		839FA4E22A3CB8DD004F07BC /* database.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = database.swift; sourceTree = "<group>"; };
+		83E746F12A3CCE16007F4A6B /* Help.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Help.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		834D0D6E2A37815D00E33E25 /* Frameworks */ = {
+		839FA4D12A3CB7FA004F07BC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				834D0D812A37842800E33E25 /* SQLite in Frameworks */,
+				839FA4E62A3CBAC2004F07BC /* SQLite in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		834D0D682A37815D00E33E25 = {
+		839FA4CB2A3CB7FA004F07BC = {
 			isa = PBXGroup;
 			children = (
-				834D0D732A37815D00E33E25 /* gustave */,
-				834D0D722A37815D00E33E25 /* Products */,
+				839FA4D62A3CB7FA004F07BC /* gustave */,
+				839FA4D52A3CB7FA004F07BC /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		834D0D722A37815D00E33E25 /* Products */ = {
+		839FA4D52A3CB7FA004F07BC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				834D0D712A37815D00E33E25 /* gustave */,
+				839FA4D42A3CB7FA004F07BC /* gustave */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		834D0D732A37815D00E33E25 /* gustave */ = {
+		839FA4D62A3CB7FA004F07BC /* gustave */ = {
 			isa = PBXGroup;
 			children = (
-				834D0D742A37815D00E33E25 /* main.swift */,
-				834D0D7B2A3781EF00E33E25 /* DatabaseManager.swift */,
-				834D0D7D2A37821100E33E25 /* GustaveServices.swift */,
+				839FA4D72A3CB7FA004F07BC /* main.swift */,
+				839FA4E02A3CB8D4004F07BC /* services.swift */,
+				839FA4E22A3CB8DD004F07BC /* database.swift */,
+				83E746F12A3CCE16007F4A6B /* Help.swift */,
 			);
 			path = gustave;
 			sourceTree = "<group>";
@@ -73,13 +76,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		834D0D702A37815D00E33E25 /* gustave */ = {
+		839FA4D32A3CB7FA004F07BC /* gustave */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 834D0D782A37815D00E33E25 /* Build configuration list for PBXNativeTarget "gustave" */;
+			buildConfigurationList = 839FA4DB2A3CB7FA004F07BC /* Build configuration list for PBXNativeTarget "gustave" */;
 			buildPhases = (
-				834D0D6D2A37815D00E33E25 /* Sources */,
-				834D0D6E2A37815D00E33E25 /* Frameworks */,
-				834D0D6F2A37815D00E33E25 /* CopyFiles */,
+				839FA4D02A3CB7FA004F07BC /* Sources */,
+				839FA4D12A3CB7FA004F07BC /* Frameworks */,
+				839FA4D22A3CB7FA004F07BC /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -87,28 +90,28 @@
 			);
 			name = gustave;
 			packageProductDependencies = (
-				834D0D802A37842800E33E25 /* SQLite */,
+				839FA4E52A3CBAC2004F07BC /* SQLite */,
 			);
 			productName = gustave;
-			productReference = 834D0D712A37815D00E33E25 /* gustave */;
+			productReference = 839FA4D42A3CB7FA004F07BC /* gustave */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		834D0D692A37815D00E33E25 /* Project object */ = {
+		839FA4CC2A3CB7FA004F07BC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1430;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
-					834D0D702A37815D00E33E25 = {
+					839FA4D32A3CB7FA004F07BC = {
 						CreatedOnToolsVersion = 14.3;
 					};
 				};
 			};
-			buildConfigurationList = 834D0D6C2A37815D00E33E25 /* Build configuration list for PBXProject "gustave" */;
+			buildConfigurationList = 839FA4CF2A3CB7FA004F07BC /* Build configuration list for PBXProject "gustave" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -116,34 +119,35 @@
 				en,
 				Base,
 			);
-			mainGroup = 834D0D682A37815D00E33E25;
+			mainGroup = 839FA4CB2A3CB7FA004F07BC;
 			packageReferences = (
-				834D0D7F2A37842800E33E25 /* XCRemoteSwiftPackageReference "SQLite" */,
+				839FA4E42A3CBAC2004F07BC /* XCRemoteSwiftPackageReference "SQLite.swift" */,
 			);
-			productRefGroup = 834D0D722A37815D00E33E25 /* Products */;
+			productRefGroup = 839FA4D52A3CB7FA004F07BC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				834D0D702A37815D00E33E25 /* gustave */,
+				839FA4D32A3CB7FA004F07BC /* gustave */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
-		834D0D6D2A37815D00E33E25 /* Sources */ = {
+		839FA4D02A3CB7FA004F07BC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				834D0D7E2A37821100E33E25 /* GustaveServices.swift in Sources */,
-				834D0D7C2A3781EF00E33E25 /* DatabaseManager.swift in Sources */,
-				834D0D752A37815D00E33E25 /* main.swift in Sources */,
+				839FA4D82A3CB7FA004F07BC /* main.swift in Sources */,
+				839FA4E12A3CB8D4004F07BC /* services.swift in Sources */,
+				83E746F22A3CCE16007F4A6B /* Help.swift in Sources */,
+				839FA4E32A3CB8DD004F07BC /* database.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		834D0D762A37815D00E33E25 /* Debug */ = {
+		839FA4D92A3CB7FA004F07BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -203,7 +207,7 @@
 			};
 			name = Debug;
 		};
-		834D0D772A37815D00E33E25 /* Release */ = {
+		839FA4DA2A3CB7FA004F07BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -256,25 +260,23 @@
 			};
 			name = Release;
 		};
-		834D0D792A37815D00E33E25 /* Debug */ = {
+		839FA4DC2A3CB7FA004F07BC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W7Z25PYZZ5;
 				ENABLE_HARDENED_RUNTIME = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.chippewa.gustave;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
-		834D0D7A2A37815D00E33E25 /* Release */ = {
+		839FA4DD2A3CB7FA004F07BC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W7Z25PYZZ5;
 				ENABLE_HARDENED_RUNTIME = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = io.chippewa.gustave;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -283,20 +285,20 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		834D0D6C2A37815D00E33E25 /* Build configuration list for PBXProject "gustave" */ = {
+		839FA4CF2A3CB7FA004F07BC /* Build configuration list for PBXProject "gustave" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				834D0D762A37815D00E33E25 /* Debug */,
-				834D0D772A37815D00E33E25 /* Release */,
+				839FA4D92A3CB7FA004F07BC /* Debug */,
+				839FA4DA2A3CB7FA004F07BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		834D0D782A37815D00E33E25 /* Build configuration list for PBXNativeTarget "gustave" */ = {
+		839FA4DB2A3CB7FA004F07BC /* Build configuration list for PBXNativeTarget "gustave" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				834D0D792A37815D00E33E25 /* Debug */,
-				834D0D7A2A37815D00E33E25 /* Release */,
+				839FA4DC2A3CB7FA004F07BC /* Debug */,
+				839FA4DD2A3CB7FA004F07BC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -304,9 +306,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		834D0D7F2A37842800E33E25 /* XCRemoteSwiftPackageReference "SQLite" */ = {
+		839FA4E42A3CBAC2004F07BC /* XCRemoteSwiftPackageReference "SQLite.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/stephencelis/SQLite.swift";
+			repositoryURL = "https://github.com/stephencelis/SQLite.swift.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 0.14.1;
@@ -315,12 +317,12 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		834D0D802A37842800E33E25 /* SQLite */ = {
+		839FA4E52A3CBAC2004F07BC /* SQLite */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 834D0D7F2A37842800E33E25 /* XCRemoteSwiftPackageReference "SQLite" */;
+			package = 839FA4E42A3CBAC2004F07BC /* XCRemoteSwiftPackageReference "SQLite.swift" */;
 			productName = SQLite;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 834D0D692A37815D00E33E25 /* Project object */;
+	rootObject = 839FA4CC2A3CB7FA004F07BC /* Project object */;
 }
