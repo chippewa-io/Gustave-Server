@@ -39,7 +39,6 @@ class Database {
                 t.column(secret)
                 t.column(expiration)
             })
-            print("Table created successfully.")
         } catch {
             print("Cannot create table: \(error)")
         }
@@ -49,7 +48,6 @@ class Database {
         let insert = secrets.insert(self.secret <- secret, self.expiration <- expiration)
         do {
             try db?.run(insert)
-            print("Secret inserted successfully.")
         } catch {
             print("Cannot insert secret: \(error)")
         }

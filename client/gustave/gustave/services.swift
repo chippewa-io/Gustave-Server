@@ -29,7 +29,7 @@ class Services {
                 print("Error: \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
-            //print("data: \(data)")
+            
             if let _ = String(data: data, encoding: .utf8) {
                 let secret = self.getSecretFromPlist()
                 self.storeSecretInDatabase(secret: secret)
@@ -50,19 +50,14 @@ class Services {
     }
 
     func storeSecretInDatabase(secret: String) {
-        print("storeSecretInDatabase: Starting...")
         let expiration = getExpirationDate()
-        print("storeSecretInDatabase: Got expiration date \(expiration)")
         db.insertSecret(secret: secret, expiration: expiration)
-        print("storeSecretInDatabase: Secret stored.")
+        print("Secret stored.")
     }
 
     func getExpirationDate() -> String {
-        print("getExpirationDate: Starting...")
-        
         let plistPath = "/Library/Managed Preferences/io.chippewa.gustave.plist"
         guard let plistData = FileManager.default.contents(atPath: plistPath) else {
-            print("getExpirationDate: Error reading plist file")
             return ""
         }
         
@@ -70,11 +65,9 @@ class Services {
         guard let plistDict = try? PropertyListSerialization.propertyList(from: plistData, options: .mutableContainersAndLeaves, format: &format) as? [String: Any],
               let secretDict = plistDict["Secret"] as? [String: Any],
               let expirationDate = secretDict["Expiration"] as? Int else {
-            print("getExpirationDate: Error reading plist file or finding 'Expiration' key")
             return ""
         }
         
-        print("getExpirationDate: Got expiration date \(expirationDate)")
         return String(expirationDate)
     }
 
@@ -103,11 +96,11 @@ class Services {
                 break
             } else {
                 // Regex match failed
-                print("Failed to receive the secret.")
+                print("...")
                 attempts += 1
                 if attempts < maxAttempts {
                     // Wait for 2 seconds before trying again
-                    print("Retrying in 2 seconds...")
+                    print(".....")
                     let _ = semaphore.wait(timeout: .now() + .seconds(2))
                 } else {
                     print("Exiting after \(maxAttempts) attempts.")
@@ -121,12 +114,11 @@ class Services {
 
 
     func checkSecretStatus(secret: String) {
-        print("checkSecretStatus: Starting...")
         let expirationDate = getExpirationDate()
         if expirationDate == "active" {
-            print("checkSecretStatus: Secret is active.")
+            print("Secret is active.")
         } else {
-            print("checkSecretStatus: Secret is not active or expired.")
+            print("Secret is not active or expired.")
         }
     }
 }
