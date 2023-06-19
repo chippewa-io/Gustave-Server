@@ -112,7 +112,7 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}"'
+    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
 
     existing_profile = check_for_existing_profile(profile_name)
     if existing_profile:
