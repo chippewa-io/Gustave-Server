@@ -6,13 +6,18 @@
 //
 import Foundation
 
+// Check for sudo
+if getuid() != 0 {
+    print("There was an error.\n\nThis application must be run as root. Try the sudo command.")
+    exit(1)
+}
+
 class Gustave {
     let db = Database()
     let services = Services()  // Create an instance of the Services class
 
     func initiate() {
         // This is where we will implement the logic to gather a secret.
-        print("Initiating the process to gather a secret...")
         services.generateSecret()  // Call the generateSecret() function in the Services class
     }
 
@@ -23,12 +28,6 @@ class Gustave {
 }
 
 var gustave = Gustave()
-
-// Check for sudo
-if getuid() != 0 {
-    print("There was an error.\n\nThis application must be run as root. Try the sudo command.")
-    exit(1)
-}
 
 // Print help docs
 if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-h") || CommandLine.arguments.contains("help") {
