@@ -15,11 +15,8 @@ class Services {
     func generateSecret() {
         print("getting secret...")
         
-        if let existingSecretData = db.getUnexpiredSecret() {
+        if db.getUnexpiredSecret() != nil {
                 print("Using existing secret.")
-                let secret = existingSecretData.secret
-                //storeSecretInDatabase(secret: secret)
-                //checkSecretStatus(secret: secret)
                 return
             }
         print("No pre-existing secret found")
@@ -84,15 +81,15 @@ class Services {
     }
 
 
-    func getUDID() -> String? {
-        let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+    func getUDID() -> String {
+        let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
 
         if platformExpert != IO_OBJECT_NULL {
             let uuidAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformUUIDKey as CFString, kCFAllocatorDefault, 0).takeRetainedValue() as! CFString
             IOObjectRelease(platformExpert)
             return uuidAsCFString as String
         }
-        return nil
+        return ""
     }
 
     func storeSecretInDatabase(secret: String) {
