@@ -10,6 +10,7 @@ import logging
 from routes.computers import computers_bp
 from routes.token_generation import token_generation_bp
 from routes.secret import secrets_bp
+from routes.profiles import profiles_bp
 # Import init_db function
 from services import init_db, cleanup_expired_profiles
 
