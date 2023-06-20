@@ -4,6 +4,7 @@ import requests
 from services import mysql
 from services import generate_jamf_pro_token
 import xml.etree.ElementTree as ET
+import io
 
 
 computers_bp = Blueprint('computers', __name__)
@@ -95,6 +96,13 @@ def update_computer():
         ET.SubElement(extension_attribute, "id").text = id
         ET.SubElement(extension_attribute, "value").text = value
         xml_data = ET.tostring(root, encoding="utf-8", method="xml")
+
+        # Convert the XML tree to a string including the XML declaration
+        import io
+        f = io.BytesIO()
+        tree = ET.ElementTree(root)
+        tree.write(f, encoding='utf-8', xml_declaration=True)
+        xml_data = f.getvalue()
 
         # Construct the headers
         headers = {
