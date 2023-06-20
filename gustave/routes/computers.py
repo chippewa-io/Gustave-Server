@@ -54,7 +54,7 @@ def get_computer_by_id():
         # Catch any other exceptions and return a generic error message
         return jsonify({'error': f'An unexpected error occurred: {str(e)}'})
 
-@app.route('/computers', methods=['POST'])
+@computers_bp.route('/computers', methods=['POST'])
 def update_computer():
     try:
         # get UDID, Secret, ID, and Value from client request
