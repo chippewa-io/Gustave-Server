@@ -118,7 +118,7 @@ def update_computer():
         print(f"Data: {xml_data.decode('utf-8')}")
         response = requests.put(url, headers=headers, data=xml_data)
 
-        if response.status_code != 201:
+        if response.status_code not in [200, 201]:
             return jsonify({'error': f'Jamf Pro API request failed with status code {response.status_code}'})
 
         # Return the response
