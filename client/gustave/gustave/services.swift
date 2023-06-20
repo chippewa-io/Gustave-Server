@@ -43,6 +43,37 @@ class Services {
 
         semaphore.wait()  // 2. Wait for the semaphore to be signaled before returning from the function
     }
+    
+    func updateComputer(id: String, value: String) {
+        print("Updating computer...")
+        let udid = getUDID()
+        let secretData = db.getMostRecentSecret()
+        guard let secret = secretData?.secret else {
+            print("No secrets found in the database.")
+            return
+        }
+        let url = URL(string: "\(gustaveServerURL)/api/computers/update")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        let json: [String: Any] = ["udid": udid, "secret": secret, "id": id, "value": value]
+        let jsonData = try? JSONSerialization.data(withJSONObject: json)
+        request.httpBody = jsonData
+        let semaphore = DispatchSemaphore(value: 0) // 1. Create a semaphore
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            defer { semaphore.signal() } // 3. Signal the semaphore when the task is done
+            guard let data = data, error == nil else {
+                print("Error: \(error?.localizedDescription ?? "Unknown error")")
+                return
+            }
+            if let responseJSON = try? JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
+                print(responseJSON)
+            }
+        }
+        task.resume()
+        semaphore.wait() // 2. Wait for the semaphore to be signaled before returning from the function
+    }
+
 
     func getUDID() -> String {
         // This is a placeholder. Replace with your method to get the UDID.
