@@ -84,9 +84,15 @@ class Services {
     }
 
 
-    func getUDID() -> String {
-        // This is a placeholder. Replace with your method to get the UDID.
-        return "93A1E4DA-2838-53F7-A962-FEA4D4F2AC0E"
+    func getUDID() -> String? {
+        let platformExpert: io_service_t = IOServiceGetMatchingService(kIOMasterPortDefault, IOServiceMatching("IOPlatformExpertDevice"))
+
+        if platformExpert != IO_OBJECT_NULL {
+            let uuidAsCFString = IORegistryEntryCreateCFProperty(platformExpert, kIOPlatformUUIDKey as CFString, kCFAllocatorDefault, 0).takeRetainedValue() as! CFString
+            IOObjectRelease(platformExpert)
+            return uuidAsCFString as String
+        }
+        return nil
     }
 
     func storeSecretInDatabase(secret: String) {

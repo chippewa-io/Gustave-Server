@@ -46,6 +46,7 @@ def store_secret(udid, computer_id, secret):
 
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
+    print("UDID from gustace" + udid)
     url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
     username = current_app.config['JAMF_PRO_USERNAME']
     password = current_app.config['JAMF_PRO_PASSWORD']
