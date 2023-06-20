@@ -127,7 +127,7 @@ def update_computer():
 
         
         # Return the response
-        return jsonify(response.json())
+        return jsonify({'message': 'Request was successful, but the response was not expected'})
 
     except Exception as e:
         # Catch any other exceptions and return a generic error message
