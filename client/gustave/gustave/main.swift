@@ -54,6 +54,19 @@ if CommandLine.arguments.count > 1 {
         gustave.initiate()
     case "read":
         gustave.read()
+    case "query":
+        if CommandLine.arguments.count > 2 {
+            let queryType = CommandLine.arguments[2]
+            switch queryType {
+            case "computer":
+                gustave.services.queryComputer()
+            default:
+                print("Unknown query type: \(queryType)")
+            }
+        } else {
+            print("No query type entered.")
+        }
+
     default:
         print("Unknown command: \(command)")
     }
