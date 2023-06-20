@@ -105,6 +105,9 @@ def update_computer():
 
         # Send the PUT request
         url = f"{jamf_pro_url}/JSSResource/computers/id/{computer_id}"
+        print(f"URL: {url}")
+        print(f"Headers: {headers}")
+        print(f"Data: {xml_data.decode('utf-8')}")
         response = requests.put(url, headers=headers, data=xml_data)
 
         if response.status_code != 200:
