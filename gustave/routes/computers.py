@@ -3,6 +3,8 @@ from flaskext.mysql import MySQL
 import requests
 from services import mysql
 from services import generate_jamf_pro_token
+import xml.etree.ElementTree as ET
+
 
 computers_bp = Blueprint('computers', __name__)
 
