@@ -119,10 +119,15 @@ def update_computer():
         response = requests.put(url, headers=headers, data=xml_data)
 
         if response.status_code not in [200, 201]:
-            return jsonify({'error': f'Jamf Pro API request failed with status code {response.status_code}'})
+            # Return the response
+            if response.content:
+                return jsonify(response.json())
+            else:
+                return jsonify({'message': 'Request was successful, no content returned'})
 
+        
         # Return the response
-        return jsonify(response.json())
+        #return jsonify(response.json())
 
     except Exception as e:
         # Catch any other exceptions and return a generic error message
