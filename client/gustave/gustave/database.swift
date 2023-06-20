@@ -32,6 +32,23 @@ class Database {
         }
     }
     
+    func getUnexpiredSecret() -> (secret: String, expiration: String)? {
+        if let mostRecentSecretData = getMostRecentSecret() {
+            let currentTime = Int(Date().timeIntervalSince1970) // Get the current time in seconds
+            if let expirationTime = Int(mostRecentSecretData.expiration), expirationTime > currentTime {
+                // If the expiration time of the most recent secret is later than the current time, the secret is not expired
+                print("Using existing unexpired secret.")
+                return mostRecentSecretData
+            } else {
+                print("Most recent secret is expired.")
+            }
+        } else {
+            print("No secret found in the database.")
+        }
+        return nil
+    }
+
+    
     func createTable() throws {
         do {
             try db?.run(secrets.create(ifNotExists: true) { t in

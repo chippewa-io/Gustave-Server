@@ -14,6 +14,15 @@ class Services {
 
     func generateSecret() {
         print("getting secret...")
+        
+        if let existingSecretData = db.getUnexpiredSecret() {
+                print("Using existing secret.")
+                let secret = existingSecretData.secret
+                //storeSecretInDatabase(secret: secret)
+                //checkSecretStatus(secret: secret)
+                return
+            }
+        print("No pre-existing secret found")
         let udid = getUDID()
         let url = URL(string: "\(gustaveServerURL)/api/secret")!
         var request = URLRequest(url: url)
