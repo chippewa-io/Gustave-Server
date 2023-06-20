@@ -405,6 +405,25 @@ def cleanup_expired_profiles(app):
             cleanup_lock.release()
 
 
+def delete_profiles_for_udid(udid):
+    # Get the computer ID for the given UDID
+    computer_id = get_computer_id(udid)
+    if not computer_id:
+        return {"error": "No computer found for the given UDID"}, 404
+
+    # Get the profile IDs for the given computer ID
+    profile_ids = get_scoped_profile_ids([computer_id])
+    if not profile_ids:
+        return {"message": "No profiles found for the given computer ID"}, 200
+
+    # Unscope and delete profiles
+    for profile_id in profile_ids:
+        unscope_profile(profile_id)
+        threading.Timer(600, delete_profile_after_delay, args=[profile_id]).start()
+
+    return {"message": "Profile deletion scheduled for all profiles of the given computer ID"}, 200
+
+
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
     base_url = current_app.config['JAMF_PRO_URL']
