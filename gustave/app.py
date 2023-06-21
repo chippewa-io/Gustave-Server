@@ -10,6 +10,7 @@ import logging
 from routes.computers import computers_bp
 from routes.token_generation import token_generation_bp
 from routes.secret import secrets_bp
+from routes.profiles import profiles_bp
 # Import init_db function
 from services import init_db, cleanup_expired_profiles
 
@@ -37,7 +38,7 @@ def create_app(config_class=config.DevelopmentConfig):
     app.register_blueprint(computers_bp, url_prefix='/api')
     app.register_blueprint(token_generation_bp, url_prefix='/api')
     app.register_blueprint(secrets_bp, url_prefix='/api')
-    #app.register_blueprint(computer_bp, url_prefix='/api')
+    app.register_blueprint(profiles_bp, url_prefix='/api')
     return app
 
 if __name__ == '__main__':
