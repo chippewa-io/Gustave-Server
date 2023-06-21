@@ -420,9 +420,32 @@ def delete_profiles_for_udid(udid):
     # Unscope and delete profiles
     for profile_id in profile_ids:
         unscope_profile(profile_id)
+        move_profiles(profile_id)
         threading.Timer(600, delete_profile_after_delay, args=[profile_id]).start()
 
     return {"message": "Profile deletion scheduled for all profiles of the given computer ID"}, 200
+
+def delete_profile_after_delay(profile_id):
+    # Here, you should add the code to delete the profile in Jamf Pro.
+    # This will depend on the API provided by Jamf Pro.
+    # For example, you might need to send a DELETE request to a specific URL.
+    # You might also need to include some headers in the request.
+    # Here's a basic example:
+    token = generate_jamf_pro_token()
+    url = f"{current_app.config['JAMF_PRO_URL']}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    headers = {
+        "Accept": "application/xml",
+        "Content-Type": "application/xml",
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.delete(url, headers=headers)
+
+    if response.status_code == 200:
+        print(f"Successfully deleted profile with ID {profile_id}.")
+    elif response.status_code == 404:
+        print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
+    else:
+        print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
 
 def check_for_existing_profile(profile_name):
