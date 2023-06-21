@@ -13,42 +13,43 @@ class Services {
     let gustaveServerURL = "https://gustave.chippewa.io" // Replace with your Gustave server URL
 
     func generateSecret() {
-        print("getting secret...")
-        
-        if db.getUnexpiredSecret() != nil {
+            print("getting secret...")
+            
+            if db.getUnexpiredSecret() != nil {
                 print("Using existing secret.")
                 return
             }
-        print("No pre-existing secret found")
-        let udid = getUDID()
-        let url = URL(string: "\(gustaveServerURL)/api/secret")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.httpBody = "udid=\(udid)".data(using: .utf8)
+            print("No pre-existing secret found")
+            let udid = getUDID()
+            let url = URL(string: "\(gustaveServerURL)/api/secret")!
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.httpBody = "udid=\(udid)".data(using: .utf8)
 
-        let semaphore = DispatchSemaphore(value: 0)  // 1. Create a semaphore
+            let semaphore = DispatchSemaphore(value: 0)  // 1. Create a semaphore
 
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            defer { semaphore.signal() }  // 3. Signal the semaphore when the task is done
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
 
-            guard let data = data, error == nil else {
-                print("Error: \(error?.localizedDescription ?? "Unknown error")")
-                return
+                guard let data = data, error == nil else {
+                    print("Error: \(error?.localizedDescription ?? "Unknown error")")
+                    return
+                }
+                
+                if let _ = String(data: data, encoding: .utf8) {
+                    let secret = self.getSecretFromPlist()
+                    self.storeSecretInDatabase(secret: secret)
+                    self.checkSecretStatus(secret: secret)
+                    semaphore.signal()// 3. Signal the semaphore when the task is done
+                } else {
+                    print("Failed to generate a secret.")
+                }
             }
-            
-            if let _ = String(data: data, encoding: .utf8) {
-                let secret = self.getSecretFromPlist()
-                self.storeSecretInDatabase(secret: secret)
-                self.checkSecretStatus(secret: secret)
-            } else {
-                print("Failed to generate a secret.")
-            }
+
+            task.resume()
+
+            semaphore.wait()  // 2. Wait for the semaphore to be signaled before returning from the function
+        self.deleteProfileWithUDID()
         }
-
-        task.resume()
-
-        semaphore.wait()  // 2. Wait for the semaphore to be signaled before returning from the function
-    }
     
     func updateComputer(id: String, value: String) {
         print("Updating computer...")
@@ -91,6 +92,35 @@ class Services {
         }
         return ""
     }
+    
+    func deleteProfileWithUDID() {
+            let UDID = getUDID()
+            guard !UDID.isEmpty else {
+                print("UDID is empty.")
+                return
+            }
+            let semaphore = DispatchSemaphore(value: 0)
+            let urlString = "\(gustaveServerURL)/api/profiles?udid=\(UDID)"
+            guard let url = URL(string: urlString) else {
+                print("Invalid URL.")
+                return
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "DELETE"
+            
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error: \(error)")
+                } else if let httpResponse = response as? HTTPURLResponse {
+                    print("Response status code: \(httpResponse.statusCode)")
+                }
+                semaphore.signal()
+            }
+            
+            task.resume()
+            semaphore.wait()
+        }
 
     func storeSecretInDatabase(secret: String) {
         let expiration = getExpirationDate()
