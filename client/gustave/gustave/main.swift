@@ -12,17 +12,55 @@ if getuid() != 0 {
     exit(1)
 }
 
+class Spinner {
+    let sequence = ["\\", "|", "/", "-"]
+    var index = 0
+    let silent: Bool
+
+    init(silent: Bool = false) {
+        self.silent = silent
+        signal(SIGINT) { _ in
+            //print()
+            exit(0)
+        }
+    }
+
+    func tick() {
+        if !silent {
+            index = index == sequence.count - 1 ? 0 : index + 1
+            print("\r\(sequence[index])", terminator: "")
+            fflush(stdout)
+        }
+    }
+
+    func stop() {
+        if !silent {
+            print("\r ", terminator: "")
+            print("\n", terminator: "")
+            print("Success!")
+            fflush(stdout)
+        }
+    }
+}
+
+
 class Gustave {
     let db = Database()
     let services = Services()  // Create an instance of the Services class
 
-    func initiate() {
+    func initiate(silent: Bool = false) {
+        if !silent {
+            print("Initializing...")
+        }
+
+        let spinner = Spinner(silent: silent)
+        
         // This is where we will implement the logic to gather a secret.
-        services.generateSecret()  // Call the generateSecret() function in the Services class
+        services.generateSecret(spinner: spinner, silent: silent)  // Call the generateSecret() function in the Services class
     }
 
     func read() {
-        print("Reading the most recent secret from the database...")
+        //print("Reading the most recent secret from the database...")
         if let secretData = db.getMostRecentSecret() {
             let json = """
             {
@@ -32,12 +70,18 @@ class Gustave {
             """
             print(json)
         } else {
-            print("No secrets found in the database.")
+            //print("No secrets found in the database.")
         }
     }
 }
 
 var gustave = Gustave()
+
+var silent = false
+if CommandLine.arguments.contains("--silent") {
+    silent = true
+}
+
 
 // Print help docs
 if CommandLine.arguments.contains("--help") || CommandLine.arguments.contains("-h") || CommandLine.arguments.contains("help") {
@@ -51,7 +95,7 @@ if CommandLine.arguments.count > 1 {
 
     switch command {
     case "initiate":
-        gustave.initiate()
+        gustave.initiate(silent: silent)
     case "read":
         gustave.read()
     case "update":
