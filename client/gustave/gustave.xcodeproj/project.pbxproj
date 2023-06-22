@@ -27,6 +27,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		830BA95B2A449DC0000474AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		839FA4D42A3CB7FA004F07BC /* gustave */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = gustave; sourceTree = BUILT_PRODUCTS_DIR; };
 		839FA4D72A3CB7FA004F07BC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		839FA4E02A3CB8D4004F07BC /* services.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = services.swift; sourceTree = "<group>"; };
@@ -69,6 +70,7 @@
 				839FA4E02A3CB8D4004F07BC /* services.swift */,
 				839FA4E22A3CB8DD004F07BC /* database.swift */,
 				83E746F12A3CCE16007F4A6B /* Help.swift */,
+				830BA95B2A449DC0000474AB /* Info.plist */,
 			);
 			path = gustave;
 			sourceTree = "<group>";
@@ -266,6 +268,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W7Z25PYZZ5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/gustave/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -277,6 +280,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = W7Z25PYZZ5;
 				ENABLE_HARDENED_RUNTIME = YES;
+				INFOPLIST_FILE = "$(SRCROOT)/gustave/Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
