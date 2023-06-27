@@ -1,15 +1,16 @@
 # app.py
 import sys
+import os
+
+current_dir = os.path.dirname(os.path.realpath(__file__))
+parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
+
 from flask import Flask
 import config
 from flask_apscheduler import APScheduler
 from waitress import serve
-import os
 import logging
-current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
 
 # Import blueprints
 from routes.computers import computers_bp
