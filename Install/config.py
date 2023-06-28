@@ -1,8 +1,5 @@
 class Config:
     """Base configuration."""
-    DEBUG = True
-    TESTING = True
-    TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
     MYSQL_DATABASE_HOST = '127.0.0.1'  # change this line
     MYSQL_DATABASE_USER = 'beaver'
     MYSQL_DATABASE_PASSWORD = 'gustave03'
@@ -17,9 +14,18 @@ class Config:
 
 class DevelopmentConfig(Config):
     CONFIG_CLASS = 'config.DevelopmentConfig'
-
-class ProductionConfig(Config):
-    pass
+    USE_WAITRESS = False
+    DEBUG = True
+    TESTING = True
+    TOKEN_EXPIRATION = 5 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
 
 class TestingConfig(Config):
-    pass
+    CONFIG_CLASS = 'config.TestingConfig'
+    USE_WAITRESS = False
+    TESTING = True
+    TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
+
+class ProductionConfig(Config):
+    CONFIG_CLASS = 'config.ProductionConfig'
+    USE_WAITRESS = True
+    TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour

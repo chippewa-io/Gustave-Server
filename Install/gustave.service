@@ -1,9 +1,11 @@
 [Unit]
 Description=gustave
+After=network.target
 
 [Service]
 User=chris
-WorkingDirectory=/usr/local/Gustave_build2-1.0/gustave
+Environment="FLASK_CONFIG=ProductionConfig"
+WorkingDirectory=/usr/local/gustave/gustave
 ExecStart=/usr/bin/python3 /usr/local/Gustave_build2-1.0/gustave/app.py
 Environment="PYTHONPATH=${PYTHONPATH}:/usr/local/Gustave_build2-1.0/"
 Restart=always
