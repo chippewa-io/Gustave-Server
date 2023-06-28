@@ -11,7 +11,7 @@ from threading import Lock
 from flaskext.mysql import MySQL
 from flask import current_app
 from flask import Flask
-from gustave.config import Config
+#from gustave.config import Config
 
 ##loging
 logging.basicConfig(level=logging.INFO)
