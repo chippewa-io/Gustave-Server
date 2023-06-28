@@ -19,7 +19,7 @@ from routes.secret import secrets_bp
 from routes.profiles import profiles_bp
 
 # Import init_db function
-from services import init_db, cleanup_expired_profiles
+#from services import init_db, cleanup_expired_profiles
 
 # Load config
 spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
