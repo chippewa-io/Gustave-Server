@@ -1,7 +1,7 @@
 # app.py
 import sys
 import os
-import imp
+import importlib.util
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.dirname(current_dir)
@@ -22,7 +22,9 @@ from routes.profiles import profiles_bp
 from services import init_db, cleanup_expired_profiles
 
 # Load config
-Config = imp.load_source('config', '/etc/gustave/config.py')
+spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
+Config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Config)
 
 # Create app
 def create_app(config_class='DevelopmentConfig'):
