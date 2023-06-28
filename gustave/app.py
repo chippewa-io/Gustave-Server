@@ -35,16 +35,16 @@ def create_app(config_class='DevelopmentConfig'):
     init_db(app)
     
     # Initialize APScheduler
-    scheduler = APScheduler()
-    scheduler.init_app(app)
+    #scheduler = APScheduler()
+    #scheduler.init_app(app)
     
     # Add a job that runs every X minutes
-    if not scheduler.running:
-        scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', minutes=1, id='cleanup_expired_profiles', args=(app,))
-        scheduler.start()
-        app.logger.info("Scheduler started")
-    else:
-        app.logger.info("Scheduler already running")
+    #if not scheduler.running:
+    #    scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', minutes=1, id='cleanup_expired_profiles', args=(app,))
+    #    scheduler.start()
+    #    app.logger.info("Scheduler started")
+    #else:
+    #    app.logger.info("Scheduler already running")
     
     # Register the blueprints
     app.register_blueprint(computers_bp, url_prefix='/api')
