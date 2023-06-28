@@ -1,0 +1,17 @@
+[Unit]
+Description=gustave
+After=network.target
+
+[Service]
+User=chris
+Environment="FLASK_CONFIG=DevelopmentConfig"
+WorkingDirectory=/home/chris/gustave/gustave
+ExecStart=/usr/bin/python3 /home/chris/gustave/gustave/app.py
+Environment="PYTHONPATH=${PYTHONPATH}:/home/chris/gustave"
+Environment="PYTHONPATH=${PYTHONPATH}:/home/chris/gustave/gustave"
+Restart=always
+StandardOutput=append:/var/log/gustave.log
+StandardError=append:/var/log/gustave.log
+
+[Install]
+WantedBy=multi-user.target
