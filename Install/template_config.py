@@ -1,16 +1,16 @@
 class Config:
     """Base configuration."""
-    MYSQL_DATABASE_HOST = '127.0.0.1'  # change this line
-    MYSQL_DATABASE_USER = 'beaver'
-    MYSQL_DATABASE_PASSWORD = 'gustave03'
-    MYSQL_DATABASE_DB = 'secrets'
-    MYSQL_DATABASE_PORT = 3306
-    JAMF_PRO_URL = 'https://tcohoon.jamfcloud.com'
-    JAMF_PRO_USERNAME = 'admin'
-    JAMF_PRO_PASSWORD = 'jamf1234'
-    CATEGORY_ID = 5
-    CATEGORY_NAME = "Gustave Tokens"
-    PROFILE_DESCRIPTION = "This profile is used on the backend of your system.  Please ignore this."
+    MYSQL_DATABASE_HOST = ''  # change this line
+    MYSQL_DATABASE_USER = ''
+    MYSQL_DATABASE_PASSWORD = ''
+    MYSQL_DATABASE_DB = ''
+    MYSQL_DATABASE_PORT = 
+    JAMF_PRO_URL = ''
+    JAMF_PRO_USERNAME = ''
+    JAMF_PRO_PASSWORD = ''
+    CATEGORY_ID = 
+    CATEGORY_NAME = ""
+    PROFILE_DESCRIPTION = ""
 
 class DevelopmentConfig(Config):
     USE_WAITRESS = False

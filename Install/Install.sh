@@ -52,13 +52,32 @@ category_name=$(dialog --stdout --inputbox "CATEGORY_NAME:" 0 0)
 
 # Output the values into config.py
 cat << EOF > config.py
-JAMF_PRO_URL = "$jamf_pro_url"
-JAMF_PRO_USERNAME = "$jamf_pro_username"
-JAMF_PRO_PASSWORD = "$jamf_pro_password"
-MYSQL_HOST = "$mysql_host"
-MYSQL_USER = "$mysql_user"
-MYSQL_PASSWORD = "$mysql_password"
-MYSQL_DB = "$mysql_db"
-CATEGORY_ID = "$category_id"
-CATEGORY_NAME = "$category_name"
+class Config:
+    """Base configuration."""
+    MYSQL_DATABASE_HOST = '$mysql_host'
+    MYSQL_DATABASE_USER = '$mysql_user'
+    MYSQL_DATABASE_PASSWORD = '$mysql_password'
+    MYSQL_DATABASE_DB = '$mysql_db'
+    MYSQL_DATABASE_PORT = 3306
+    JAMF_PRO_URL = '$jamf_pro_url'
+    JAMF_PRO_USERNAME = '$jamf_pro_username'
+    JAMF_PRO_PASSWORD = '$jamf_pro_password'
+    CATEGORY_ID = $category_id
+    CATEGORY_NAME = "$category_name"
+    PROFILE_DESCRIPTION = "This profile is used on the backend of your system.  Please ignore this."
+
+class DevelopmentConfig(Config):
+    USE_WAITRESS = False
+    DEBUG = True
+    TESTING = True
+    TOKEN_EXPIRATION = 5 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
+
+class TestingConfig(Config):
+    USE_WAITRESS = False
+    TESTING = True
+    TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
+
+class ProductionConfig(Config):
+    USE_WAITRESS = True
+    TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
 EOF
