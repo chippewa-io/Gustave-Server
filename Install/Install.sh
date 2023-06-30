@@ -91,6 +91,7 @@ EOF
 log "config.py generated"
 # Create the gustave user
 dialog --infobox "Creating the Gustave user..." 10 40
+sleep 1
 sudo adduser --system --group gustave
 if [ $? -eq 0 ]; then
     log "Gustave user created successfully."
@@ -100,7 +101,8 @@ fi
 
 # Move the gustave executable to the proper location
 dialog --infobox "Moving the Gustave executable to the proper location..." 10 40
-sudo mv /path/to/gustave /usr/local/gustave
+sleep 1
+sudo mv ./gustave /usr/local/gustave
 if [ $? -eq 0 ]; then
     log "gustave moved properly."
 else
@@ -109,7 +111,8 @@ fi
 
 # Set the owner to gustave
 dialog --infobox "Setting the owner to Gustave..." 10 40
-sudo chown gustave:gustave /proper/location/gustave
+sleep 1
+sudo chown gustave:gustave /usr/local/bin/gustave
 if [ $? -eq 0 ]; then
     log "permissions configured for gustave."
 else
@@ -118,7 +121,8 @@ fi
 
 # Set the permissions
 dialog --infobox "Setting the permissions..." 10 40
-sudo chmod 755 /proper/location/gustave
+sleep 1
+sudo chmod 755 /usr/local/bin/gustave
 if [ $? -eq 0 ]; then
     log "modified gustave."
 else
@@ -127,7 +131,8 @@ fi
 
 # Move the gustave.service file to the systemd directory
 dialog --infobox "Moving the Gustave service file to the systemd directory..." 10 40
-sudo mv /path/to/gustave.service /etc/systemd/system/gustave.service
+sleep 1
+sudo mv ./gustave.service /etc/systemd/system/gustave.service
 if [ $? -eq 0 ]; then
     log "Created gustave service."
 else
@@ -136,12 +141,14 @@ fi
 
 # Set the owner and permissions for the service file
 dialog --infobox "Setting the owner and permissions for the service file..." 10 40
+sleep 1
 sudo chown root:root /etc/systemd/system/gustave.service
 if [ $? -eq 0 ]; then
     log "Set owner /etc/systemd/system/gustave.service to root:root."
 else
     log "Failed to Set owner /etc/systemd/system/gustave.service to root:root."
 fi
+sleep 1
 sudo chmod 644 /etc/systemd/system/gustave.service
 if [ $? -eq 0 ]; then
     log "modified /etc/systemd/system/gustave.service to 644."
@@ -151,7 +158,8 @@ fi
 
 # Move the config.py file to the proper location
 dialog --infobox "Moving the config.py file to the proper location..." 10 40
-sudo mv /path/to/config.py /proper/location/config.py
+sleep 1
+sudo mv ./config.py /etc/gustave/config.py
 if [ $? -eq 0 ]; then
     log "Moved config.py into place."
 else
@@ -160,20 +168,49 @@ fi
 
 # Set the owner and permissions for the config file
 dialog --infobox "Setting the owner and permissions for the config file..." 10 40
-sudo chown gustave:gustave /proper/location/config.py
-
-sudo chmod 644 /proper/location/config.py
-
+sleep 1
+sudo chown gustave:gustave /etc/gustave/config.py
+if [ $? -eq 0 ]; then
+    log "Set owner /etc/gustave/config.py to gustave:gustave."
+else
+    log "Failed to set owner /etc/gustave/config.py to gustave:gustave."
+fi
+sleep 1
+sudo chmod 644 /etc/gustave/config.py
+if [ $? -eq 0 ]; then
+    log "modified /etc/gustave/config.py to 644."
+else
+    log "Failed to modify /etc/gustave/config.py to 644."
+fi
+sleep 1
 # Reload the systemd daemon to recognize the new service
 dialog --infobox "Reloading the systemd daemon to recognize the new service..." 10 40
 sudo systemctl daemon-reload
+if [ $? -eq 0 ]; then
+    log "Reloaded the systemd daemon."
+else
+    log "Failed to reload the systemd daemon."
+fi
+sleep 1
 
 # Enable the service so it starts on boot
 dialog --infobox "Enabling the service so it starts on boot..." 10 40
 sudo systemctl enable gustave
+if [ $? -eq 0 ]; then
+    log "Enabled the gustave service."
+else
+    log "Failed to enable the gustave service."
+fi
+sleep 1
 
 # Start the service
 dialog --infobox "Starting the service..." 10 40
 sudo systemctl start gustave
+if [ $? -eq 0 ]; then
+    log "Started the gustave service."
+else
+    log "Failed to start the gustave service."
+fi
+sleep 1
 
 dialog --msgbox "Installation complete! Gustave is now up and running." 10 40
