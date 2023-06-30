@@ -16,12 +16,31 @@ if ! grep -q 'Ubuntu 22.04' /etc/os-release; then
     exit 1
 fi
 
+#Updating package index
+echo -n "Updating package index..."
+sudo apt update &> /dev/null &
+pid=$! # Process Id of the previous running command
+
+spin='-\|/'
+
+i=0
+while kill -0 $pid 2>/dev/null
+do
+  i=$(( (i+1) %4 ))
+  printf "\b${spin:$i:1}"
+  sleep .1
+done
+wait $pid
+echo -e "\b done."
+
+
+
 # Check if dialog is installed and install it if not
 if ! command -v dialog >/dev/null 2>&1; then
     log "dialog not installed.  Installing dialog"
     echo -n "Installer initializing..."
     # Try to install dialog
-    apt-get install -y dialog &> /dev/null &
+    sudo apt install -y dialog &> /dev/null &
     pid=$! # Process Id of the previous running command
 
     spin='-\|/'
@@ -33,6 +52,7 @@ if ! command -v dialog >/dev/null 2>&1; then
       printf "\b${spin:$i:1}"
       sleep .1
     done
+    wait $pid
     log "dialog has been installed"
     echo -e "\b done."
 fi
@@ -89,6 +109,8 @@ class ProductionConfig(Config):
     TOKEN_EXPIRATION = 2629743 #in seconds.  31556926=year 2629743=month 86400=day 3600=hour
 EOF
 log "config.py generated"
+
+
 # Create the gustave user
 dialog --infobox "Creating the Gustave user..." 10 40
 sleep 1
@@ -99,10 +121,19 @@ else
     log "Failed to create Gustave user."
 fi
 
+
+# Create the gustave directory
+sudo mkdir -p /etc/gustave
+if [ $? -eq 0 ]; then
+    log "Created the gustave directory."
+else
+    log "Failed to create the gustave directory."
+fi
+
 # Move the gustave executable to the proper location
 dialog --infobox "Moving the Gustave executable to the proper location..." 10 40
 sleep 1
-sudo mv ./gustave /usr/local/gustave
+sudo mv ./gustave /usr/local/bin/gustave
 if [ $? -eq 0 ]; then
     log "gustave moved properly."
 else
