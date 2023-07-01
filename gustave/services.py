@@ -13,6 +13,8 @@ from flask import current_app
 from flask import Flask
 #from gustave.config import Config
 
+
+
 ##loging
 logging.basicConfig(level=logging.INFO)
 
@@ -113,9 +115,13 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     jamfProUser = Config.JAMF_PRO_USERNAME
     jamfProPass = Config.JAMF_PRO_PASSWORD
 
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+
+    # Construct the path to the bash script
+    script_path = os.path.join(base_path, 'resources', 'profile_create.sh')
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
+    command = f'{script_path} "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
 
     existing_profile = check_for_existing_profile(profile_name)
     if existing_profile:
