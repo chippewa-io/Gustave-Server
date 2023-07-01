@@ -1,5 +1,5 @@
 #!/bin/bash
-
+progress_file="/tmp/install_progress.txt"
 log() {
     echo "$(date '+%Y-%m-%d %H:%M:%S') - $1" >> install.log
 }
@@ -38,7 +38,7 @@ echo -e "\b done."
 # Check if dialog is installed and install it if not
 if ! command -v dialog >/dev/null 2>&1; then
     log "dialog not installed.  Installing dialog"
-    echo -n "Installer initializing..."
+    echo -n "Installing dependencies..."
     # Try to install dialog
     sudo apt install -y dialog &> /dev/null &
     pid=$! # Process Id of the previous running command
@@ -54,6 +54,28 @@ if ! command -v dialog >/dev/null 2>&1; then
     done
     wait $pid
     log "dialog has been installed"
+    echo -e "\b done."
+fi
+
+# Check if dialog is installed and install it if not
+if ! command -v python3-apt >/dev/null 2>&1; then
+    log "python3-apt not installed.  Installing python3-apt"
+    echo -n "Installing dependencies..."
+    # Try to install python3-apt
+    sudo apt install -y python3-apt &> /dev/null &
+    pid=$! # Process Id of the previous running command
+
+    spin='-\|/'
+
+    i=0
+    while kill -0 $pid 2>/dev/null
+    do
+      i=$(( (i+1) %4 ))
+      printf "\b${spin:$i:1}"
+      sleep .1
+    done
+    wait $pid
+    log "python3-apt has been installed"
     echo -e "\b done."
 fi
 
@@ -110,17 +132,43 @@ class ProductionConfig(Config):
 EOF
 log "config.py generated"
 
-
-# Create the gustave user
-dialog --infobox "Creating the Gustave user..." 10 40
-sleep 1
-sudo adduser --system --group gustave
-if [ $? -eq 0 ]; then
-    log "Gustave user created successfully."
-else
-    log "Failed to create Gustave user."
+# Check if mysql is installed and install it if not
+if ! command -v mysql >/dev/null 2>&1; then
+    log "MySQL  not installed.  Installing mysql"
+    echo -n "Installer initializing..."
+    # Try to install dialog
+    sudo python3 ./progress.py > /dev/null 2>&1 &
+    if [ $? -eq 0 ]; then
+        log "mysql has been installed"
+    else
+        log "Failed to install mysql"
+    fi
+    echo -e "\b done."
 fi
 
+while [ ! -f $progress_file ]
+do
+  sleep 0.1
+done
+
+(
+while true
+do
+    # Get the last line of the progress file that contains 'Percent' and extract the percentage
+    progress=$(grep 'Percent:' $progress_file | tail -n1 | awk -F 'Percent: ' '{ print $2 }' | awk -F '.' '{ print $1 }')
+
+    # Check if the progress is 100, if so, break the loop
+    if [ "$progress" == "100" ]; then
+        break
+    fi
+
+    # Update the dialog command's progress bar
+    echo $progress
+
+    # Wait a bit before checking the progress again
+    sleep 0.1
+done
+) | dialog --gauge "Installing MySQL..." 10 70 0
 
 # Create the gustave directory
 sudo mkdir -p /etc/gustave
@@ -244,4 +292,6 @@ else
 fi
 sleep 1
 
-dialog --msgbox "Installation complete! Gustave is now up and running." 10 40
+dialog --msgbox "Installation complete!  Please examine the log to ensure there were no errors." 0 0
+clear
+exit 0
