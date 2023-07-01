@@ -7,6 +7,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 #Remove MySQL
-sudo apt autoremove mysql-server mysql-client mysql-common
-sudo apt purge mysql-server mysql-client mysql-common
+sudo apt -y autoremove mysql-server mysql-client mysql-common
+sudo apt -y purge mysql-server mysql-client mysql-common
 sudo rm -rf /etc/mysql /var/lib/mysql
+sudo rm -rf /usr/bin/mysql
