@@ -1,0 +1,16 @@
+[Unit]
+Description=gustave
+After=network.target
+
+[Service]
+User=gustave
+Environment="FLASK_CONFIG=ProductionConfig"
+Environment="PYTHONPATH=${PYTHONPATH}:/usr/local/gustave"
+WorkingDirectory=/usr/local/bin/
+ExecStart=/usr/local/bin/gustave
+Restart=always
+StandardOutput=append:/var/log/gustave.log
+StandardError=append:/var/log/gustave.log
+
+[Install]
+WantedBy=multi-user.target

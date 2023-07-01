@@ -5,14 +5,15 @@ import subprocess
 import time
 import logging
 import threading
-import gustave.config as config
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from threading import Lock
 from flaskext.mysql import MySQL
 from flask import current_app
-from config import Config
 from flask import Flask
+#from gustave.config import Config
+
+
 
 ##loging
 logging.basicConfig(level=logging.INFO)
@@ -30,7 +31,7 @@ def store_secret(udid, computer_id, secret):
     cursor = conn.cursor()
 
     now = datetime.datetime.now()
-    token_expiration_seconds = current_app.config['TOKEN_EXPIRATION']
+    token_expiration_seconds = Config.TOKEN_EXPIRATION
     expiration_time = now + datetime.timedelta(seconds=token_expiration_seconds)
     expiration_timestamp = int(expiration_time.timestamp())
 
@@ -45,12 +46,13 @@ def store_secret(udid, computer_id, secret):
         current_app.logger.error('Failed to store secret in database: %s', e)
         return None
 
+
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
     print("UDID from gustace" + udid)
-    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
-    username = current_app.config['JAMF_PRO_USERNAME']
-    password = current_app.config['JAMF_PRO_PASSWORD']
+    url = Config.JAMF_PRO_URL + '/JSSResource/computers/udid/' + udid
+    username = Config.JAMF_PRO_USERNAME
+    password = Config.JAMF_PRO_PASSWORD
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -109,12 +111,17 @@ def extract_profile_id(xml_string):
 
 
 def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
-    jamfProURL = current_app.config['JAMF_PRO_URL']
-    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
-    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
+    jamfProURL = Config.JAMF_PRO_URL
+    jamfProUser = Config.JAMF_PRO_USERNAME
+    jamfProPass = Config.JAMF_PRO_PASSWORD
+
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+
+    # Construct the path to the bash script
+    script_path = os.path.join(base_path, 'resources', 'profile_create.sh')
 
     # Command to execute the bash script with the provided arguments
-    command = f'resources/profile_create.sh "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
+    command = f'{script_path} "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
 
     existing_profile = check_for_existing_profile(profile_name)
     if existing_profile:
@@ -156,9 +163,9 @@ def store_profile(profile_id, computer_id):
     cursor.close()
 
 def retrieve_computer_record(computer_id):
-    url = current_app.config['JAMF_PRO_URL'] + f'/JSSResource/computers/id/{computer_id}'
-    username = current_app.config['JAMF_PRO_USERNAME']
-    password = current_app.config['JAMF_PRO_PASSWORD']
+    url = Config.JAMF_PRO_URL + f'/JSSResource/computers/id/{computer_id}'
+    username = Config.JAMF_PRO_USERNAME
+    password = Config.JAMF_PRO_PASSWORD
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -168,6 +175,7 @@ def retrieve_computer_record(computer_id):
         return computer_record
 
     return None
+
 
 def check_for_expired_secrets():
     # Get the current time as a Unix timestamp
@@ -191,68 +199,62 @@ def check_for_expired_secrets():
     conn.close()
 
 def get_expired_computer_ids():
-    app = Flask(__name__)
-    app.config.from_object(current_app.config['CONFIG_CLASS'])
+    # Connect to MySQL database
+    conn = mysql_connector.connect(
+        user=Config.MYSQL_DATABASE_USER,
+        password=Config.MYSQL_DATABASE_PASSWORD,
+        host=Config.MYSQL_DATABASE_HOST,
+        database=Config.MYSQL_DATABASE_DB
+    )
 
-    with app.app_context():
-        # Connect to MySQL database
-        conn = mysql_connector.connect(
-            user=app.config['MYSQL_DATABASE_USER'],
-            password=app.config['MYSQL_DATABASE_PASSWORD'],
-            host=app.config['MYSQL_DATABASE_HOST'],
-            database=app.config['MYSQL_DATABASE_DB']
-        )
+    # Get current timestamp
+    current_time = int(time.time())
 
-        # Get current timestamp
-        current_time = int(time.time())
+    # Query the secret_table for computer IDs with expired secrets
+    query = f"SELECT computer_id FROM secret_table WHERE expiration < {current_time}"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
 
-        # Query the secret_table for computer IDs with expired secrets
-        query = f"SELECT computer_id FROM secret_table WHERE expiration < {current_time}"
-        cursor = conn.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
+    # Close database connection
+    conn.close()
 
-        # Close database connection
-        conn.close()
+    # Extract the computer IDs from the query result
+    expired_computer_ids = [row[0] for row in result]
 
-        # Extract the computer IDs from the query result
-        expired_computer_ids = [row[0] for row in result]
+    return expired_computer_ids
 
-        return expired_computer_ids
 
 def get_scoped_profile_ids(computer_ids):
     if not computer_ids:
         return []
-    app = Flask(__name__)
-    app.config.from_object(current_app.config['CONFIG_CLASS'])
 
-    with app.app_context():
-        # Connect to MySQL database
-        conn = mysql_connector.connect(
-            user=app.config['MYSQL_DATABASE_USER'],
-            password=app.config['MYSQL_DATABASE_PASSWORD'],
-            host=app.config['MYSQL_DATABASE_HOST'],
-            database=app.config['MYSQL_DATABASE_DB']
-        )
+    # Connect to MySQL database
+    conn = mysql_connector.connect(
+        user=Config.MYSQL_DATABASE_USER,
+        password=Config.MYSQL_DATABASE_PASSWORD,
+        host=Config.MYSQL_DATABASE_HOST,
+        database=Config.MYSQL_DATABASE_DB
+    )
 
-        # Query the active_profiles table for profile IDs scoped to the given computer IDs
-        computer_ids_str = ', '.join(str(computer_id) for computer_id in computer_ids)
-        query = f"SELECT profile_id FROM active_profiles WHERE computer_id IN ({computer_ids_str})"
-        cursor = conn.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
+    # Query the active_profiles table for profile IDs scoped to the given computer IDs
+    computer_ids_str = ', '.join(str(computer_id) for computer_id in computer_ids)
+    query = f"SELECT profile_id FROM active_profiles WHERE computer_id IN ({computer_ids_str})"
+    cursor = conn.cursor()
+    cursor.execute(query)
+    result = cursor.fetchall()
 
-        # Close database connection
-        conn.close()
+    # Close database connection
+    conn.close()
 
-        # Extract the profile IDs from the query result
-        scoped_profile_ids = [row[0] for row in result]
+    # Extract the profile IDs from the query result
+    scoped_profile_ids = [row[0] for row in result]
 
-        return scoped_profile_ids
+    return scoped_profile_ids
 
 def unscope_profile(profile_id):
     token = generate_jamf_pro_token()
-    url = f"{current_app.config['JAMF_PRO_URL']}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -313,97 +315,98 @@ def unscope_profile(profile_id):
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
-def move_profiles(profile_id):
-    app = Flask(__name__)
-    app.config.from_object(current_app.config['CONFIG_CLASS'])
+# def move_profiles(profile_id):
+#     # Create a Flask application instance and configure it
+#     app = Flask(__name__)
+#     app.config.from_object(Config)
 
-    with app.app_context():
-        # Connect to MySQL database
-        conn = mysql_connector.connect(
-            user=app.config['MYSQL_DATABASE_USER'],
-            password=app.config['MYSQL_DATABASE_PASSWORD'],
-            host=app.config['MYSQL_DATABASE_HOST'],
-            database=app.config['MYSQL_DATABASE_DB']
-        )
+#     with app.app_context():
+#         # Connect to MySQL database
+#         conn = mysql_connector.connect(
+#             user=app.config['MYSQL_DATABASE_USER'],
+#             password=app.config['MYSQL_DATABASE_PASSWORD'],
+#             host=app.config['MYSQL_DATABASE_HOST'],
+#             database=app.config['MYSQL_DATABASE_DB']
+#         )
 
-        # Move records from active_profiles to expired_profiles
-        try:
-            # Start a transaction
-            conn.start_transaction()
+#         # Move records from active_profiles to expired_profiles
+#         try:
+#             # Start a transaction
+#             conn.start_transaction()
 
-            # Query the active_profiles table for the given profile ID
-            query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
-            cursor = conn.cursor()
-            cursor.execute(query)
-            result = cursor.fetchall()
+#             # Query the active_profiles table for the given profile ID
+#             query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
+#             cursor = conn.cursor()
+#             cursor.execute(query)
+#             result = cursor.fetchall()
 
-            # Move records to the expired_profiles table
-            for row in result:
-                profile_id, computer_id = row
-                insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
-                cursor.execute(insert_query)
+#             # Move records to the expired_profiles table
+#             for row in result:
+#                 profile_id, computer_id = row
+#                 insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+#                 cursor.execute(insert_query)
 
-            # Delete records from the active_profiles table
-            delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
-            cursor.execute(delete_query)
+#             # Delete records from the active_profiles table
+#             delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
+#             cursor.execute(delete_query)
 
-            # Commit the transaction
-            conn.commit()
-        except Exception as e:
-            # Rollback the transaction in case of any errors
-            conn.rollback()
-            raise e
-        finally:
-            # Close database connection
-            conn.close()
+#             # Commit the transaction
+#             conn.commit()
+#         except Exception as e:
+#             # Rollback the transaction in case of any errors
+#             conn.rollback()
+#             raise e
+#         finally:
+#             # Close database connection
+#             conn.close()
 
-        return
+#         return
 
 cleanup_lock = Lock()
 processed_profiles = set()
 
-def cleanup_expired_profiles(app):
-    import logging
-    logger = logging.getLogger(__name__)
-    app.logger.info("cleanup_expired_profiles job triggered")
-    with app.app_context():
-        # Acquire the lock
-        if cleanup_lock.acquire(blocking=False):
-            # Get the computer IDs from the secret_table where the expiration has passed
-            expired_computer_ids = get_expired_computer_ids()
+# def cleanup_expired_profiles(app):
+#     import logging
+#     logger = logging.getLogger(__name__)
+#     app.logger.info("cleanup_expired_profiles job triggered")
+#     with app.app_context():
+#         # Acquire the lock
+#         if cleanup_lock.acquire(blocking=False):
+#             # Get the computer IDs from the secret_table where the expiration has passed
+#             expired_computer_ids = get_expired_computer_ids()
 
-            # Query the active_profile table for profile IDs scoped to those computer IDs
-            scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
+#             # Query the active_profile table for profile IDs scoped to those computer IDs
+#             scoped_profile_ids = get_scoped_profile_ids(expired_computer_ids)
 
-            # Unscope and delete profiles
-            for profile_id in scoped_profile_ids[:]:
-                if profile_id not in processed_profiles:
-                    # Check if the profile still exists in Jamf Pro
-                    logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
-                    existing_profile = check_for_existing_profile_id(profile_id)
+#             # Unscope and delete profiles
+#             for profile_id in scoped_profile_ids[:]:
+#                 if profile_id not in processed_profiles:
+#                     # Check if the profile still exists in Jamf Pro
+#                     logger.info(f"Checking for profile {profile_id} in Jamf Pro...")
+#                     existing_profile = check_for_existing_profile_id(profile_id)
 
-                    if existing_profile:
-                        # Unscope the profile
-                        logger.info(f"found profile {profile_id} in Jamf Pro...")
-                        unscope_profile(profile_id)
-                        logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
-                        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
-                        time.sleep(10)
+#                     if existing_profile:
+#                         # Unscope the profile
+#                         logger.info(f"found profile {profile_id} in Jamf Pro...")
+#                         unscope_profile(profile_id)
+#                         logger.info(f"unscoped profile {profile_id} in Jamf Pro...")
+#                         # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
+#                         time.sleep(10)
 
-                        # Delete the profile
-                        delete_profile(profile_id)
-                        logger.info(f"deleted profile {profile_id} in Jamf Pro...")
+#                         # Delete the profile
+#                         delete_profile(profile_id)
+#                         logger.info(f"deleted profile {profile_id} in Jamf Pro...")
 
-                        # Add the processed profile ID to the set
-                        processed_profiles.add(profile_id)
-                    else:
-                        # The profile doesn't exist, so we assume it has already been deleted
-                        logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
-                        # You may log a message or take appropriate action here if needed
-                        pass
+#                         # Add the processed profile ID to the set
+#                         processed_profiles.add(profile_id)
+#                     else:
+#                         # The profile doesn't exist, so we assume it has already been deleted
+#                         logger.info(f"profile {profile_id} has already been removed from Jamf Pro...")
+#                         # You may log a message or take appropriate action here if needed
+#                         pass
 
-            # Release the lock
-            cleanup_lock.release()
+#             # Release the lock
+#             cleanup_lock.release()
 
 
 def delete_profiles_for_udid(udid):
@@ -432,7 +435,7 @@ def delete_profile_after_delay(profile_id):
     # You might also need to include some headers in the request.
     # Here's a basic example:
     token = generate_jamf_pro_token()
-    url = f"{current_app.config['JAMF_PRO_URL']}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -450,7 +453,7 @@ def delete_profile_after_delay(profile_id):
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
-    base_url = current_app.config['JAMF_PRO_URL']
+    base_url = Config.JAMF_PRO_URL
 
     # The endpoint for getting configuration profiles
     endpoint = '/JSSResource/osxconfigurationprofiles'
@@ -500,7 +503,7 @@ def get_secret_expiration(secret):
 
 def check_for_existing_profile_id(profile_id):
     # The base URL for the Jamf Pro API
-    base_url = current_app.config['JAMF_PRO_URL']
+    base_url = Config.JAMF_PRO_URL
 
     # The endpoint for getting configuration profiles
     endpoint = f'/JSSResource/osxconfigurationprofiles/id/{profile_id}'
