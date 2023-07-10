@@ -219,6 +219,7 @@ else
     else
       log "MySQL was not installed successfully." "ERROR"
       dialog --title "Installation Error" --msgbox "MySQL was not installed successfully. Please check the log for more information." 10 40
+      clear
       exit 1
     fi
   else
@@ -261,7 +262,8 @@ if [ "$install_mysql" != "0" ]; then
   else
     log "Failed to create database." "ERROR"
     dialog --title "Database Error" --msgbox "Failed to create database. Please check the log for more information." 10 40
-    exit 1
+    clear
+    #exit 1
   fi
 fi
 
@@ -317,6 +319,7 @@ category_id=$(echo "$response" | jq -r '.id')
 if [[ "$category_id" == null ]]; then
   dialog --title "API Error" --msgbox "Bro, there was an error creating the category. Check your Jamf Pro URL and credentials and try again." 10 40
   log "Failed to create category." "ERROR"
+  clear
   exit 1
 fi
 
