@@ -263,7 +263,7 @@ if [ "$install_mysql" != "0" ]; then
     log "Failed to create database." "ERROR"
     dialog --title "Database Error" --msgbox "Failed to create database. Please check the log for more information." 10 40
     clear
-    #exit 1
+    exit 1
   fi
 fi
 
