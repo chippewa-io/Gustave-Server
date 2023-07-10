@@ -162,6 +162,15 @@ fi
 
 log "starting Dialog now" "INFO"
 dialog --title "Welcome" --msgbox "Greetings, esteemed guest! Welcome to the illustrious Gustave installation process. Shall we begin?" 10 40
+
+
+#//////////////////////////////////////////////////////////////////////////////#
+#|||||||||||||||||||||||||       Activation        |||||||||||||||||||||||||||||#
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+
+license=$(dialog --stdout --inputbox "Splendid! Now, could you please provide us with your Activation Code?" 10 60)
+
+
 ###############################################################################
 if check_mysql_installed; then
   log "MySQL is already installed." "INFO"
