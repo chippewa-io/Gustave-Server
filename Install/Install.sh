@@ -162,6 +162,15 @@ fi
 
 log "starting Dialog now" "INFO"
 dialog --title "Welcome" --msgbox "Greetings, esteemed guest! Welcome to the illustrious Gustave installation process. Shall we begin?" 10 40
+
+
+#//////////////////////////////////////////////////////////////////////////////#
+#|||||||||||||||||||||||||       Activation        |||||||||||||||||||||||||||||#
+#\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\#
+
+license=$(dialog --stdout --inputbox "Splendid! Now, could you please provide us with your Activation Code?" 10 60)
+
+
 ###############################################################################
 if check_mysql_installed; then
   log "MySQL is already installed." "INFO"
@@ -210,6 +219,7 @@ else
     else
       log "MySQL was not installed successfully." "ERROR"
       dialog --title "Installation Error" --msgbox "MySQL was not installed successfully. Please check the log for more information." 10 40
+      clear
       exit 1
     fi
   else
@@ -252,6 +262,7 @@ if [ "$install_mysql" != "0" ]; then
   else
     log "Failed to create database." "ERROR"
     dialog --title "Database Error" --msgbox "Failed to create database. Please check the log for more information." 10 40
+    clear
     exit 1
   fi
 fi
@@ -308,6 +319,7 @@ category_id=$(echo "$response" | jq -r '.id')
 if [[ "$category_id" == null ]]; then
   dialog --title "API Error" --msgbox "Bro, there was an error creating the category. Check your Jamf Pro URL and credentials and try again." 10 40
   log "Failed to create category." "ERROR"
+  clear
   exit 1
 fi
 
@@ -511,6 +523,40 @@ else
     log "Failed to start the gustave service." "ERROR"
 fi
 sleep 1
+
+# Check if service is running
+systemctl is-active --quiet gustave
+if [ $? -eq 0 ]; then
+    activate=1
+    log "gustave service is running." "INFO"
+else
+    activate=0
+    log "gustave service is not running." "ERROR"
+fi
+
+if [ $activate -eq 1 ]; then
+    dialog --msgbox "Installation complete!  Activating product..." 0 0
+    log "Reaching out to activate license" "INFO"
+    response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"license_key\":\"$license\"}" https://chequamegon.chippewa.io/api/activate)
+    status=$(echo $response | jq -r '.message')
+    if [ "$status" == "License activated" ]; then
+        dialog --msgbox "Activation successful!" 0 0
+        expiry=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"license_key\":\"$license\"}" $server/api/verify | jq -r '.remaining_time')
+        log "Checked in" "INFO"
+    else
+        dialog --msgbox "Activation failed!  Please examine the log to ensure there were no errors." 0 0
+        log "Activation failed!" "ERROR"
+        clear
+        exit 1
+    fi
+    clear
+    exit 0
+else
+    dialog --msgbox "Installation failed!  Please examine the log to ensure there were no errors." 0 0
+    log "Installation failed!" "ERROR"
+    clear
+    exit 1
+fi
 
 
 #//////////////////////////////////////////////////////////////////////////////#
