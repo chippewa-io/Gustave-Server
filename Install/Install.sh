@@ -512,6 +512,40 @@ else
 fi
 sleep 1
 
+# Check if service is running
+systemctl is-active --quiet gustave
+if [ $? -eq 0 ]; then
+    activate=1
+    log "gustave service is running." "INFO"
+else
+    activate=0
+    log "gustave service is not running." "ERROR"
+fi
+
+if [ $activate -eq 1 ]; then
+    dialog --msgbox "Installation complete!  Activating product..." 0 0
+    log "Reaching out to activate license" "INFO"
+    response=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"license_key\":\"$license\"}" https://chequamegon.chippewa.io/api/activate)
+    status=$(echo $response | jq -r '.message')
+    if [ "$status" == "License activated" ]; then
+        dialog --msgbox "Activation successful!" 0 0
+        expiry=$(curl -s -X POST -H "Content-Type: application/json" -d "{\"license_key\":\"$license\"}" $server/api/verify | jq -r '.remaining_time')
+        log "Checked in" "INFO"
+    else
+        dialog --msgbox "Activation failed!  Please examine the log to ensure there were no errors." 0 0
+        log "Activation failed!" "ERROR"
+        clear
+        exit 1
+    fi
+    clear
+    exit 0
+else
+    dialog --msgbox "Installation failed!  Please examine the log to ensure there were no errors." 0 0
+    log "Installation failed!" "ERROR"
+    clear
+    exit 1
+fi
+
 
 #//////////////////////////////////////////////////////////////////////////////#
 #|||||||||||||||||||||||||       Finish Up        |||||||||||||||||||||||||||||#
