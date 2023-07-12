@@ -9,34 +9,14 @@ import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from threading import Lock
 from flaskext.mysql import MySQL
-from flask import current_app
 from flask import Flask
-
 import os
 import importlib.util
-from flask import current_app as app
-
-# Load config
-#spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
-#config_module = importlib.util.module_from_spec(spec)
-#spec.loader.exec_module(config_module)
-
-# Determine which config to use based on environment variable
-#config_name = os.getenv('FLASK_CONFIG', 'development')
-
-#if config_name == 'development':
-#    Config = config_module.DevelopmentConfig
-#elif config_name == 'testing':
-#    Config = config_module.TestingConfig
-#elif config_name == 'production':
-#    Config = config_module.ProductionConfig
-#else:
-#    Config = config_module.DevelopmentConfig  # default to DevelopmentConfig if no match
+from flask import current_app
 
 ##loging
 logging.basicConfig(level=logging.INFO)
 
-#print(app.config['JAMF_PRO_URL'])
 
 #MySQL Connection
 mysql = MySQL()
@@ -50,7 +30,7 @@ def store_secret(udid, computer_id, secret):
     cursor = conn.cursor()
 
     now = datetime.datetime.now()
-    token_expiration_seconds = Config.TOKEN_EXPIRATION
+    token_expiration_seconds = current_app.config['TOKEN_EXPIRATION']
     expiration_time = now + datetime.timedelta(seconds=token_expiration_seconds)
     expiration_timestamp = int(expiration_time.timestamp())
 
@@ -69,9 +49,9 @@ def store_secret(udid, computer_id, secret):
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
     print("UDID from gustace" + udid)
-    url = Config.JAMF_PRO_URL + '/JSSResource/computers/udid/' + udid
-    username = Config.JAMF_PRO_USERNAME
-    password = Config.JAMF_PRO_PASSWORD
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
+    username = current_app.config['JAMF_PRO_USERNAME']
+    password = current_app.config['JAMF_PRO_PASSWORD']
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -106,8 +86,8 @@ def get_secret(udid):
         return None
 
 def generate_jamf_pro_token():
-    url = f"{Config.JAMF_PRO_URL}/uapi/auth/tokens"
-    auth = (Config.JAMF_PRO_USERNAME, Config.JAMF_PRO_PASSWORD)
+    url = current_app.config['JAMF_PRO_URL'] + '/uapi/auth/tokens'
+    auth = (current_app.config['JAMF_PRO_USERNAME'], current_app.config['JAMF_PRO_PASSWORD'])
     headers = {"Accept": "application/json"}
 
     response = requests.post(url, auth=auth, headers=headers)
@@ -130,9 +110,9 @@ def extract_profile_id(xml_string):
 
 
 def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
-    jamfProURL = Config.JAMF_PRO_URL
-    jamfProUser = Config.JAMF_PRO_USERNAME
-    jamfProPass = Config.JAMF_PRO_PASSWORD
+    jamfProURL = current_app.config['JAMF_PRO_URL']
+    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
+    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
@@ -182,9 +162,9 @@ def store_profile(profile_id, computer_id):
     cursor.close()
 
 def retrieve_computer_record(computer_id):
-    url = Config.JAMF_PRO_URL + f'/JSSResource/computers/id/{computer_id}'
-    username = Config.JAMF_PRO_USERNAME
-    password = Config.JAMF_PRO_PASSWORD
+    url = current_app.config['JAMF_PRO_URL'] + f'/JSSResource/computers/id/{computer_id}'
+    username = current_app.config['JAMF_PRO_USERNAME']
+    password = current_app.config['JAMF_PRO_PASSWORD']
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -220,10 +200,10 @@ def check_for_expired_secrets():
 def get_expired_computer_ids():
     # Connect to MySQL database
     conn = mysql_connector.connect(
-        user=Config.MYSQL_DATABASE_USER,
-        password=Config.MYSQL_DATABASE_PASSWORD,
-        host=Config.MYSQL_DATABASE_HOST,
-        database=Config.MYSQL_DATABASE_DB
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
     )
 
     # Get current timestamp
@@ -250,10 +230,10 @@ def get_scoped_profile_ids(computer_ids):
 
     # Connect to MySQL database
     conn = mysql_connector.connect(
-        user=Config.MYSQL_DATABASE_USER,
-        password=Config.MYSQL_DATABASE_PASSWORD,
-        host=Config.MYSQL_DATABASE_HOST,
-        database=Config.MYSQL_DATABASE_DB
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
     )
 
     # Query the active_profiles table for profile IDs scoped to the given computer IDs
@@ -273,7 +253,7 @@ def get_scoped_profile_ids(computer_ids):
 
 def unscope_profile(profile_id):
     token = generate_jamf_pro_token()
-    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -454,7 +434,7 @@ def delete_profile_after_delay(profile_id):
     # You might also need to include some headers in the request.
     # Here's a basic example:
     token = generate_jamf_pro_token()
-    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -472,7 +452,7 @@ def delete_profile_after_delay(profile_id):
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
-    base_url = Config.JAMF_PRO_URL
+    base_url = current_app.config['JAMF_PRO_URL']
 
     # The endpoint for getting configuration profiles
     endpoint = '/JSSResource/osxconfigurationprofiles'
@@ -522,8 +502,7 @@ def get_secret_expiration(secret):
 
 def check_for_existing_profile_id(profile_id):
     # The base URL for the Jamf Pro API
-    base_url = Config.JAMF_PRO_URL
-
+    base_url = current_app.config['JAMF_PRO_URL']
     # The endpoint for getting configuration profiles
     endpoint = f'/JSSResource/osxconfigurationprofiles/id/{profile_id}'
 
