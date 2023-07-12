@@ -14,16 +14,29 @@ from flask import Flask
 
 import os
 import importlib.util
+from flask import current_app as app
 
 # Load config
-spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
-Config = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(Config)
+#spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
+#config_module = importlib.util.module_from_spec(spec)
+#spec.loader.exec_module(config_module)
 
+# Determine which config to use based on environment variable
+#config_name = os.getenv('FLASK_CONFIG', 'development')
+
+#if config_name == 'development':
+#    Config = config_module.DevelopmentConfig
+#elif config_name == 'testing':
+#    Config = config_module.TestingConfig
+#elif config_name == 'production':
+#    Config = config_module.ProductionConfig
+#else:
+#    Config = config_module.DevelopmentConfig  # default to DevelopmentConfig if no match
 
 ##loging
 logging.basicConfig(level=logging.INFO)
 
+#print(app.config['JAMF_PRO_URL'])
 
 #MySQL Connection
 mysql = MySQL()
