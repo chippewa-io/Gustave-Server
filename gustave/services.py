@@ -12,7 +12,13 @@ from flaskext.mysql import MySQL
 from flask import current_app
 from flask import Flask
 
-#from config import Config 
+import os
+import importlib.util
+
+# Load config
+spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
+Config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(Config)
 
 
 ##loging
