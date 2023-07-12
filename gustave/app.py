@@ -32,7 +32,7 @@ def create_app(config_class='DevelopmentConfig'):
     # Configure the app with the given config class (defaulting to DevelopmentConfig)
     app.config.from_object(getattr(Config, config_class))
     # Initialize MySQL extension
-    #init_db(app)
+    init_db(app)
     
     # Initialize APScheduler
     #scheduler = APScheduler()
