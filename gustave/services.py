@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 from threading import Lock
 from flaskext.mysql import MySQL
 from flask import Flask
+import sys
 import os
 import importlib.util
 from flask import current_app
@@ -148,6 +149,7 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     
     except subprocess.CalledProcessError as e:
         error_message = e.stderr
+        return {'error': error_message}
         # Handle the error
 
 def store_profile(profile_id, computer_id):
