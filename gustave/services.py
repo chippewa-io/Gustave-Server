@@ -325,6 +325,7 @@ def move_profiles(profile_id):
         host=current_app.config['MYSQL_DATABASE_HOST'],
         database=current_app.config['MYSQL_DATABASE_DB']
     )
+    
 
     # Move records from active_profiles to expired_profiles
     try:
