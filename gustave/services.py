@@ -255,7 +255,8 @@ def get_scoped_profile_ids(computer_ids):
 
 def unscope_profile(profile_id):
     token = generate_jamf_pro_token()
-    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + str(profile_id)
+
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
