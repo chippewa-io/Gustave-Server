@@ -1,3 +1,4 @@
+#secret.py
 from flask import Blueprint, request, jsonify, current_app
 import time
 from services import get_computer_id, generate_secret, store_secret, get_secret, create_and_scope_profile, get_secret_expiration

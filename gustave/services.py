@@ -9,11 +9,11 @@ import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from threading import Lock
 from flaskext.mysql import MySQL
-from flask import current_app
 from flask import Flask
-from gustave.config import Config
-
-
+import sys
+import os
+import importlib.util
+from flask import current_app
 
 ##loging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +31,7 @@ def store_secret(udid, computer_id, secret):
     cursor = conn.cursor()
 
     now = datetime.datetime.now()
-    token_expiration_seconds = Config.TOKEN_EXPIRATION
+    token_expiration_seconds = current_app.config['TOKEN_EXPIRATION']
     expiration_time = now + datetime.timedelta(seconds=token_expiration_seconds)
     expiration_timestamp = int(expiration_time.timestamp())
 
@@ -50,9 +50,9 @@ def store_secret(udid, computer_id, secret):
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
     print("UDID from gustace" + udid)
-    url = Config.JAMF_PRO_URL + '/JSSResource/computers/udid/' + udid
-    username = Config.JAMF_PRO_USERNAME
-    password = Config.JAMF_PRO_PASSWORD
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
+    username = current_app.config['JAMF_PRO_USERNAME']
+    password = current_app.config['JAMF_PRO_PASSWORD']
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -87,8 +87,8 @@ def get_secret(udid):
         return None
 
 def generate_jamf_pro_token():
-    url = f"{Config.JAMF_PRO_URL}/uapi/auth/tokens"
-    auth = (Config.JAMF_PRO_USERNAME, Config.JAMF_PRO_PASSWORD)
+    url = current_app.config['JAMF_PRO_URL'] + '/uapi/auth/tokens'
+    auth = (current_app.config['JAMF_PRO_USERNAME'], current_app.config['JAMF_PRO_PASSWORD'])
     headers = {"Accept": "application/json"}
 
     response = requests.post(url, auth=auth, headers=headers)
@@ -111,9 +111,9 @@ def extract_profile_id(xml_string):
 
 
 def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
-    jamfProURL = Config.JAMF_PRO_URL
-    jamfProUser = Config.JAMF_PRO_USERNAME
-    jamfProPass = Config.JAMF_PRO_PASSWORD
+    jamfProURL = current_app.config['JAMF_PRO_URL']
+    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
+    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
 
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
 
@@ -149,6 +149,7 @@ def create_and_scope_profile(computer_id, secret, expiration, category_id, profi
     
     except subprocess.CalledProcessError as e:
         error_message = e.stderr
+        return {'error': error_message}
         # Handle the error
 
 def store_profile(profile_id, computer_id):
@@ -163,9 +164,9 @@ def store_profile(profile_id, computer_id):
     cursor.close()
 
 def retrieve_computer_record(computer_id):
-    url = Config.JAMF_PRO_URL + f'/JSSResource/computers/id/{computer_id}'
-    username = Config.JAMF_PRO_USERNAME
-    password = Config.JAMF_PRO_PASSWORD
+    url = current_app.config['JAMF_PRO_URL'] + f'/JSSResource/computers/id/{computer_id}'
+    username = current_app.config['JAMF_PRO_USERNAME']
+    password = current_app.config['JAMF_PRO_PASSWORD']
 
     headers = {"Accept": "application/json"}
     response = requests.get(url, auth=(username, password), headers=headers)
@@ -201,10 +202,10 @@ def check_for_expired_secrets():
 def get_expired_computer_ids():
     # Connect to MySQL database
     conn = mysql_connector.connect(
-        user=Config.MYSQL_DATABASE_USER,
-        password=Config.MYSQL_DATABASE_PASSWORD,
-        host=Config.MYSQL_DATABASE_HOST,
-        database=Config.MYSQL_DATABASE_DB
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
     )
 
     # Get current timestamp
@@ -231,10 +232,10 @@ def get_scoped_profile_ids(computer_ids):
 
     # Connect to MySQL database
     conn = mysql_connector.connect(
-        user=Config.MYSQL_DATABASE_USER,
-        password=Config.MYSQL_DATABASE_PASSWORD,
-        host=Config.MYSQL_DATABASE_HOST,
-        database=Config.MYSQL_DATABASE_DB
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
     )
 
     # Query the active_profiles table for profile IDs scoped to the given computer IDs
@@ -254,7 +255,8 @@ def get_scoped_profile_ids(computer_ids):
 
 def unscope_profile(profile_id):
     token = generate_jamf_pro_token()
-    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + str(profile_id)
+
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -315,52 +317,49 @@ def unscope_profile(profile_id):
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
-# def move_profiles(profile_id):
-#     # Create a Flask application instance and configure it
-#     app = Flask(__name__)
-#     app.config.from_object(Config)
+def move_profiles(profile_id):
+    # Connect to MySQL database
+    conn = mysql_connector.connect(
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
+    )
+    
 
-#     with app.app_context():
-#         # Connect to MySQL database
-#         conn = mysql_connector.connect(
-#             user=app.config['MYSQL_DATABASE_USER'],
-#             password=app.config['MYSQL_DATABASE_PASSWORD'],
-#             host=app.config['MYSQL_DATABASE_HOST'],
-#             database=app.config['MYSQL_DATABASE_DB']
-#         )
+    # Move records from active_profiles to expired_profiles
+    try:
+        # Start a transaction
+        conn.start_transaction()
 
-#         # Move records from active_profiles to expired_profiles
-#         try:
-#             # Start a transaction
-#             conn.start_transaction()
+        # Query the active_profiles table for the given profile ID
+        query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
 
-#             # Query the active_profiles table for the given profile ID
-#             query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
-#             cursor = conn.cursor()
-#             cursor.execute(query)
-#             result = cursor.fetchall()
+        # Move records to the expired_profiles table
+        for row in result:
+            profile_id, computer_id = row
+            insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+            cursor.execute(insert_query)
 
-#             # Move records to the expired_profiles table
-#             for row in result:
-#                 profile_id, computer_id = row
-#                 insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
-#                 cursor.execute(insert_query)
+        # Delete records from the active_profiles table
+        delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
+        cursor.execute(delete_query)
 
-#             # Delete records from the active_profiles table
-#             delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
-#             cursor.execute(delete_query)
+        # Commit the transaction
+        conn.commit()
+    except Exception as e:
+        # Rollback the transaction in case of any errors
+        conn.rollback()
+        raise e
+    finally:
+        # Close database connection
+        conn.close()
 
-#             # Commit the transaction
-#             conn.commit()
-#         except Exception as e:
-#             # Rollback the transaction in case of any errors
-#             conn.rollback()
-#             raise e
-#         finally:
-#             # Close database connection
-#             conn.close()
+    return
 
-#         return
 
 cleanup_lock = Lock()
 processed_profiles = set()
@@ -435,7 +434,7 @@ def delete_profile_after_delay(profile_id):
     # You might also need to include some headers in the request.
     # Here's a basic example:
     token = generate_jamf_pro_token()
-    url = f"{Config.JAMF_PRO_URL}/JSSResource/osxconfigurationprofiles/id/{profile_id}"
+    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -453,7 +452,7 @@ def delete_profile_after_delay(profile_id):
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
-    base_url = Config.JAMF_PRO_URL
+    base_url = current_app.config['JAMF_PRO_URL']
 
     # The endpoint for getting configuration profiles
     endpoint = '/JSSResource/osxconfigurationprofiles'
@@ -503,8 +502,7 @@ def get_secret_expiration(secret):
 
 def check_for_existing_profile_id(profile_id):
     # The base URL for the Jamf Pro API
-    base_url = Config.JAMF_PRO_URL
-
+    base_url = current_app.config['JAMF_PRO_URL']
     # The endpoint for getting configuration profiles
     endpoint = f'/JSSResource/osxconfigurationprofiles/id/{profile_id}'
 
