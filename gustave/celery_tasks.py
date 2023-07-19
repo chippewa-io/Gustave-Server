@@ -31,9 +31,10 @@ config_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config_module)
 print(dir(config_module))
 # Extract the values
-JAMF_PRO_URL = config_module.JAMF_PRO_URL
-JAMF_PRO_USERNAME = config_module.JAMF_PRO_USERNAME
-JAMF_PRO_PASSWORD = config_module.JAMF_PRO_PASSWORD
+JAMF_PRO_URL = config_module.Config.JAMF_PRO_URL
+JAMF_PRO_USERNAME = config_module.Config.JAMF_PRO_USERNAME
+JAMF_PRO_PASSWORD = config_module.Config.JAMF_PRO_PASSWORD
+
 
 
 def generate_jamf_pro_token():
