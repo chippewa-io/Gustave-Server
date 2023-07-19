@@ -30,21 +30,28 @@ def store_secret(udid, computer_id, secret):
     conn = mysql.get_db()
     cursor = conn.cursor()
 
-    now = datetime.datetime.now()
-    token_expiration_seconds = current_app.config['TOKEN_EXPIRATION']
-    expiration_time = now + datetime.timedelta(seconds=token_expiration_seconds)
-    expiration_timestamp = int(expiration_time.timestamp())
+    # Check if a record with this udid already exists
+    query = "SELECT * FROM secret_table WHERE udid = %s"
+    cursor.execute(query, (udid,))
+    existing_record = cursor.fetchone()
 
-    query = "INSERT INTO secret_table (udid, computer_id, secret, expiration) VALUES (%s, %s, %s, %s)"
+    if existing_record:
+        # If it exists, set its is_active flag to FALSE
+        update_query = "UPDATE secret_table SET is_active = FALSE WHERE udid = %s"
+        cursor.execute(update_query, (udid,))
+
+    # Insert the new record (is_active will be TRUE by default)
+    insert_query = """
+        INSERT INTO secret_table (udid, computer_id, secret, expiration, is_active)
+        VALUES (%s, %s, %s, %s, TRUE)
+    """
     values = (udid, computer_id, secret, expiration_timestamp)
-    try:
-        cursor.execute(query, values)
-        conn.commit()
-        cursor.close()
-        return expiration_timestamp
-    except mysql_connector.Error as e:
-        current_app.logger.error('Failed to store secret in database: %s', e)
-        return None
+    cursor.execute(insert_query, values)
+    conn.commit()
+    cursor.close()
+
+    return expiration_timestamp
+
 
 
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
@@ -74,7 +81,7 @@ def get_secret(udid):
     conn = mysql.get_db()
     cursor = conn.cursor()
 
-    query = "SELECT secret, expiration FROM secret_table WHERE udid = %s"
+    query = query = "SELECT secret, expiration FROM secret_table WHERE udid = %s AND is_active = TRUE"
     values = (udid,)
     cursor.execute(query, values)
     result = cursor.fetchone()
