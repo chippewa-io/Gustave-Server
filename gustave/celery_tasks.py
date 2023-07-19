@@ -4,7 +4,6 @@ import importlib.util
 import requests
 import logging
 from celery import Celery
-from app import app
 from services import generate_jamf_pro_token
 
 celery = Celery()
