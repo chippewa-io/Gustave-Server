@@ -29,6 +29,7 @@ sys.path.append('/etc/gustave')
 spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
 config_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config_module)
+print(dir(config_module))
 # Extract the values
 JAMF_PRO_URL = config_module.JAMF_PRO_URL
 JAMF_PRO_USERNAME = config_module.JAMF_PRO_USERNAME
