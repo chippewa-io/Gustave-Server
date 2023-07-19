@@ -14,7 +14,6 @@ import sys
 import os
 import importlib.util
 from flask import current_app
-from celery_tasks import delete_profile_after_delay
 ##loging
 logging.basicConfig(level=logging.INFO)
 
@@ -408,6 +407,7 @@ processed_profiles = set()
 
 
 def delete_profiles_for_udid(udid):
+    from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
     computer_id = get_computer_id(udid)
     if not computer_id:

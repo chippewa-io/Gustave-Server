@@ -1,9 +1,26 @@
 import sys
 import os
 import importlib.util
+import requests
+import logging
 from celery import Celery
 from app import app
 from services import generate_jamf_pro_token
+
+celery = Celery()
+
+def init_celery(flask_app):
+    celery.config_from_object(flask_app.config)
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+
 
 # Load config
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -29,26 +46,6 @@ def generate_jamf_pro_token():
         raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
 
 
-def make_celery(app):
-    celery = Celery(
-        app.import_name,
-        backend=app.config['CELERY_RESULT_BACKEND'],
-        broker=app.config['CELERY_BROKER_URL']
-    )
-    celery.conf.update(app.config)
-    TaskBase = celery.Task
-
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-    return celery
-
-celery = make_celery(app)
 
 @celery.task
 def delete_profile_after_delay(profile_id):
