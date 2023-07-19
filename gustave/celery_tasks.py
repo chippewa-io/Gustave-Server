@@ -6,21 +6,6 @@ import logging
 from celery import Celery
 from services import generate_jamf_pro_token
 
-celery = Celery()
-
-def init_celery(flask_app):
-    celery.config_from_object(flask_app.config)
-    TaskBase = celery.Task
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with flask_app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-
-
 # Load config
 sys.path.append('/etc/gustave')
 # Add the path to the system path for direct imports
@@ -34,7 +19,24 @@ print(dir(config_module))
 JAMF_PRO_URL = config_module.Config.JAMF_PRO_URL
 JAMF_PRO_USERNAME = config_module.Config.JAMF_PRO_USERNAME
 JAMF_PRO_PASSWORD = config_module.Config.JAMF_PRO_PASSWORD
+CELERY_BROKER_URL = config_module.Config.CELERY_BROKER_URL
+CELERY_RESULT_BACKEND = config_module.Config.CELERY_RESULT_BACKEND
 
+celery = Celery()
+
+def init_celery(flask_app):
+    celery.config_from_object(flask_app.config)
+    celery.conf.broker_url = CELERY_BROKER_URL
+    celery.conf.result_backend = CELERY_RESULT_BACKEND
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
 
 
 def generate_jamf_pro_token():

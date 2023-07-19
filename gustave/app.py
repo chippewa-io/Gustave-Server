@@ -9,13 +9,11 @@ sys.path.append(parent_dir)
 sys.path.append('/etc/gustave')
 
 from flask import Flask
-from flask_apscheduler import APScheduler
 from waitress import serve
 import logging
 
 # Import blueprints
 from routes.computers import computers_bp
-from routes.token_generation import token_generation_bp
 from routes.secret import secrets_bp
 from routes.profiles import profiles_bp
 
@@ -52,21 +50,8 @@ def create_app(config_class=Config):
     # Initialize MySQL extension
     init_db(app)
     
-    # Initialize APScheduler
-    #scheduler = APScheduler()
-    #scheduler.init_app(app)
-    
-    # Add a job that runs every X minutes
-    #if not scheduler.running:
-    #    scheduler.add_job(func=cleanup_expired_profiles, trigger='interval', minutes=1, id='cleanup_expired_profiles', args=(app,))
-    #    scheduler.start()
-    #    app.logger.info("Scheduler started")
-    #else:
-    #    app.logger.info("Scheduler already running")
-    
     # Register the blueprints
     app.register_blueprint(computers_bp, url_prefix='/api')
-    app.register_blueprint(token_generation_bp, url_prefix='/api')
     app.register_blueprint(secrets_bp, url_prefix='/api')
     app.register_blueprint(profiles_bp, url_prefix='/api')
     return app
