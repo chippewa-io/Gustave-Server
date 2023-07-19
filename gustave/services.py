@@ -420,6 +420,7 @@ def delete_profiles_for_udid(udid):
     print ("computer ID: " + str(computer_id))
     profile_ids = get_scoped_profile_ids([computer_id])
     if not profile_ids:
+        print ("No profiles found for the given computer ID " + str(computer_id)")
         return {"message": "No profiles found for the given computer ID"}, 200
 
     # Unscope and delete profiles
