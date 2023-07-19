@@ -313,19 +313,6 @@ def unscope_profile(profile_id):
         print(f"Successfully unscoped profile with ID {profile_id}.")
         move_profiles(profile_id)
 
-        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
-        time.sleep(10)
-
-        # Additional DELETE request
-        delete_response = requests.delete(url, headers=headers)
-
-        if delete_response.status_code == 200:
-            print(f"Successfully deleted profile with ID {profile_id}.")
-        elif response.status_code == 404:
-            print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
-        else:
-            print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
-
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
 
