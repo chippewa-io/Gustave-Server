@@ -417,12 +417,16 @@ def delete_profiles_for_udid(udid):
         return {"error": "No computer found for the given UDID"}, 404
 
     # Get the profile IDs for the given computer ID
+    print ("computer ID: " + str(computer_id))
     profile_ids = get_scoped_profile_ids([computer_id])
     if not profile_ids:
         return {"message": "No profiles found for the given computer ID"}, 200
 
     # Unscope and delete profiles
+    print ("profile IDs: " + str(profile_ids))
     for profile_id in profile_ids:
+        print ("profile ID: " + str(profile_id))
+        print ("unscoping profile...")
         unscope_profile(profile_id)
         
         # Schedule the Celery task to run after a 600-second delay
