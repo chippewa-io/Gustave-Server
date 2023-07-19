@@ -23,17 +23,22 @@ def init_celery(flask_app):
 
 
 # Load config
-current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
 sys.path.append('/etc/gustave')
+# Add the path to the system path for direct imports
+sys.path.append('/etc/gustave')
+# Import the configuration
 spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
 config_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config_module)
+# Extract the values
+JAMF_PRO_URL = config_module.JAMF_PRO_URL
+JAMF_PRO_USERNAME = config_module.JAMF_PRO_USERNAME
+JAMF_PRO_PASSWORD = config_module.JAMF_PRO_PASSWORD
+
 
 def generate_jamf_pro_token():
-    url = app.config['JAMF_PRO_URL'] + '/uapi/auth/tokens'
-    auth = (app.config['JAMF_PRO_USERNAME'], app.config['JAMF_PRO_PASSWORD'])
+    url = JAMF_PRO_URL + '/uapi/auth/tokens'
+    auth = (JAMF_PRO_USERNAME, JAMF_PRO_PASSWORD)
     headers = {"Accept": "application/json"}
 
     response = requests.post(url, auth=auth, headers=headers)
@@ -46,7 +51,6 @@ def generate_jamf_pro_token():
         raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
 
 
-
 @celery.task
 def delete_profile_after_delay(profile_id):
     # Here, you should add the code to delete the profile in Jamf Pro.
@@ -56,7 +60,7 @@ def delete_profile_after_delay(profile_id):
     # Here's a basic example:
     print ("running... delete_profile_after_delay")
     token = generate_jamf_pro_token()
-    url = app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
+    url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
