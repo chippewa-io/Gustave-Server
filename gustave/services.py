@@ -30,6 +30,11 @@ def store_secret(udid, computer_id, secret):
     conn = mysql.get_db()
     cursor = conn.cursor()
 
+    now = datetime.datetime.now()
+    token_expiration_seconds = current_app.config['TOKEN_EXPIRATION']
+    expiration_time = now + datetime.timedelta(seconds=token_expiration_seconds)
+    expiration_timestamp = int(expiration_time.timestamp())
+
     # Check if a record with this udid already exists
     query = "SELECT * FROM secret_table WHERE udid = %s"
     cursor.execute(query, (udid,))
