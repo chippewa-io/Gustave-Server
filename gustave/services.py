@@ -409,6 +409,7 @@ processed_profiles = set()
 def delete_profiles_for_udid(udid):
     from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
+    print ("Preparing to delete profiiles for UDID: " + udid)
     computer_id = get_computer_id(udid)
     if not computer_id:
         return {"error": "No computer found for the given UDID"}, 404
