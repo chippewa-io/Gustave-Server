@@ -40,6 +40,11 @@ else:
 ##loging
 logging.basicConfig(level=logging.INFO)
 
+import redis
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
+r.set('foo', 'bar')
+print(r.get('foo'))
+
 
 # Create app
 def create_app(config_class=Config):
