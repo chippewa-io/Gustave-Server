@@ -37,23 +37,22 @@ def store_secret(udid, computer_id, secret):
     # Check if a record with this udid already exists
     query = "SELECT * FROM secret_table WHERE udid = %s"
     cursor.execute(query, (udid,))
-    existing_record = cursor.fetchone() 
+existing_record = cursor.fetchone() 
 
-    if existing_record:
-        # If it exists, set its is_active flag to FALSE
-        update_query = "UPDATE secret_table SET is_active = FALSE WHERE udid = %s"
-        cursor.execute(update_query, (udid,))
+if existing_record:
+    # If it exists, set its is_active flag to FALSE
+    update_query = "UPDATE secret_table SET is_active = FALSE WHERE udid = %s"
+    cursor.execute(update_query, (udid,))
 
-    # Insert the new record (is_active will be TRUE by default)
-    insert_query = """
-        INSERT INTO secret_table (udid, computer_id, secret, expiration, is_active)
-        VALUES (%s, %s, %s, %s, TRUE)
-    """
-    values = (udid, computer_id, secret, expiration_timestamp)
-    cursor.execute(insert_query, values)
-    conn.commit()
-    cursor.close()
-
+# Insert the new record (is_active will be TRUE by default)
+insert_query = """
+    INSERT INTO secret_table (udid, computer_id, secret, expiration, is_active)
+    VALUES (%s, %s, %s, %s, TRUE)
+"""
+values = (udid, computer_id, secret, expiration_timestamp)
+cursor.execute(insert_query, values)
+conn.commit()
+cursor.close()
 
     return expiration_timestamp
 
