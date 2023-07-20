@@ -409,6 +409,8 @@ processed_profiles = set()
 
 
 def delete_profiles_for_udid(udid):
+    import sys
+    sys.path.append("/etc/gustave")
     from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
     computer_id = get_computer_id(udid)
