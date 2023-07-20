@@ -1,40 +1,21 @@
-import sys
-import os
-import importlib.util
 import requests
 import logging
 from celery import Celery
 from services import generate_jamf_pro_token
 
-# Load config
-sys.path.append('/etc/gustave')
-# Add the path to the system path for direct imports
-sys.path.append('/etc/gustave')
-# Import the configuration
-spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
-config_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(config_module)
-print(dir(config_module))
-# Extract the values
-JAMF_PRO_URL = config_module.Config.JAMF_PRO_URL
-JAMF_PRO_USERNAME = config_module.Config.JAMF_PRO_USERNAME
-JAMF_PRO_PASSWORD = config_module.Config.JAMF_PRO_PASSWORD
-CELERY_BROKER_URL = config_module.Config.CELERY_BROKER_URL
-CELERY_RESULT_BACKEND = config_module.Config.CELERY_RESULT_BACKEND
-
-print ("JAMF_PRO_URL: " + JAMF_PRO_URL)
-print ("JAMF_PRO_USERNAME: " + JAMF_PRO_USERNAME)
-print ("JAMF_PRO_PASSWORD: " + JAMF_PRO_PASSWORD)
-print ("CELERY_BROKER_URL: " + CELERY_BROKER_URL)
-print ("CELERY_RESULT_BACKEND: " + CELERY_RESULT_BACKEND)
-
-celery = Celery()
+# Create a Celery instance
+celery = Celery(__name__)
 
 def init_celery(flask_app):
+    """
+    Initialize Celery with the Flask app context.
+    """
     celery.config_from_object(flask_app.config)
-    celery.conf.broker_url = CELERY_BROKER_URL
-    celery.conf.result_backend = CELERY_RESULT_BACKEND
+    celery.conf.broker_url = flask_app.config['CELERY_BROKER_URL']
+    celery.conf.result_backend = flask_app.config['CELERY_RESULT_BACKEND']
+    
     TaskBase = celery.Task
+
     class ContextTask(TaskBase):
         abstract = True
 
@@ -44,29 +25,8 @@ def init_celery(flask_app):
 
     celery.Task = ContextTask
 
-
-def generate_jamf_pro_token():
-    url = JAMF_PRO_URL + '/uapi/auth/tokens'
-    auth = (JAMF_PRO_USERNAME, JAMF_PRO_PASSWORD)
-    headers = {"Accept": "application/json"}
-
-    response = requests.post(url, auth=auth, headers=headers)
-
-    if response.status_code == 200:
-        jamfToken = response.json().get('token')
-        return jamfToken
-    else:
-        logging.error(f"Failed to generate Jamf Pro API token: {response.content}")
-        raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
-
-
 @celery.task
 def delete_profile_after_delay(profile_id):
-    # Here, you should add the code to delete the profile in Jamf Pro.
-    # This will depend on the API provided by Jamf Pro.
-    # For example, you might need to send a DELETE request to a specific URL.
-    # You might also need to include some headers in the request.
-    # Here's a basic example:
     print ("running... delete_profile_after_delay")
     token = generate_jamf_pro_token()
     url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
