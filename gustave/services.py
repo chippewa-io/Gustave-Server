@@ -355,7 +355,7 @@ def unscope_profile(profile_id):
 
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
-        #move_profiles(profile_id)
+        move_profiles(profile_id)
 
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
@@ -411,23 +411,17 @@ processed_profiles = set()
 def delete_profiles_for_udid(udid):
     from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
-    print ("Preparing to delete profiiles for UDID: " + udid)
     computer_id = get_computer_id(udid)
     if not computer_id:
         return {"error": "No computer found for the given UDID"}, 404
 
     # Get the profile IDs for the given computer ID
-    print ("computer ID: " + str(computer_id))
     profile_ids = get_scoped_profile_ids([computer_id])
     if not profile_ids:
-        print ("No profiles found for the given computer ID ")
         return {"message": "No profiles found for the given computer ID"}, 200
 
     # Unscope and delete profiles
-    print ("profile IDs: " + str(profile_ids))
     for profile_id in profile_ids:
-        print ("profile ID: " + str(profile_id))
-        print ("unscoping profile...")
         unscope_profile(profile_id)
         
         # Schedule the Celery task to run after a 600-second delay

@@ -1,13 +1,8 @@
-##############################################
-# celery_tasks.py file
-##############################################
+import sys
+import importlib.util
 import requests
 import logging
 from celery import Celery
-import importlib.util
-import os
-import sys
-from services import generate_jamf_pro_token
 
 # Load config
 sys.path.append('/etc/gustave')
@@ -25,6 +20,23 @@ JAMF_PRO_PASSWORD = config_module.Config.JAMF_PRO_PASSWORD
 CELERY_BROKER_URL = config_module.Config.CELERY_BROKER_URL
 CELERY_RESULT_BACKEND = config_module.Config.CELERY_RESULT_BACKEND
 
+#celery = Celery()
+celery = Celery(__name__, broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
+def init_celery(flask_app):
+    celery.config_from_object(flask_app.config)
+    celery.conf.broker_url = CELERY_BROKER_URL
+    celery.conf.result_backend = CELERY_RESULT_BACKEND
+    TaskBase = celery.Task
+    class ContextTask(TaskBase):
+        abstract = True
+
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return TaskBase.__call__(self, *args, **kwargs)
+
+    celery.Task = ContextTask
+
+
 def generate_jamf_pro_token():
     url = JAMF_PRO_URL + '/uapi/auth/tokens'
     auth = (JAMF_PRO_USERNAME, JAMF_PRO_PASSWORD)
@@ -40,33 +52,16 @@ def generate_jamf_pro_token():
         raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
 
 
-# Create a Celery instance
-celery = Celery(__name__)
-celery.config_from_object('celeryconfig')
-def init_celery(flask_app):
-    """
-    Initialize Celery with the Flask app context.
-    """
-    celery.config_from_object(flask_app.config)
-    celery.conf.broker_url = flask_app.config['CELERY_BROKER_URL']
-    celery.conf.result_backend = flask_app.config['CELERY_RESULT_BACKEND']
-    
-    TaskBase = celery.Task
-
-    class ContextTask(TaskBase):
-        abstract = True
-
-        def __call__(self, *args, **kwargs):
-            with flask_app.app_context():
-                return TaskBase.__call__(self, *args, **kwargs)
-
-    celery.Task = ContextTask
-
 @celery.task
 def delete_profile_after_delay(profile_id):
+    # Here, you should add the code to delete the profile in Jamf Pro.
+    # This will depend on the API provided by Jamf Pro.
+    # For example, you might need to send a DELETE request to a specific URL.
+    # You might also need to include some headers in the request.
+    # Here's a basic example:
     print ("running... delete_profile_after_delay")
     token = generate_jamf_pro_token()
-    url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + str(profile_id)
+    url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
@@ -80,4 +75,5 @@ def delete_profile_after_delay(profile_id):
         print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
     else:
         print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
+
 
