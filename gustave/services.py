@@ -14,7 +14,6 @@ import sys
 import os
 import importlib.util
 from flask import current_app
-
 ##loging
 logging.basicConfig(level=logging.INFO)
 
@@ -38,22 +37,22 @@ def store_secret(udid, computer_id, secret):
     # Check if a record with this udid already exists
     query = "SELECT * FROM secret_table WHERE udid = %s"
     cursor.execute(query, (udid,))
-    existing_record = cursor.fetchone()
+existing_record = cursor.fetchone() 
 
-    if existing_record:
-        # If it exists, set its is_active flag to FALSE
-        update_query = "UPDATE secret_table SET is_active = FALSE WHERE udid = %s"
-        cursor.execute(update_query, (udid,))
+if existing_record:
+    # If it exists, set its is_active flag to FALSE
+    update_query = "UPDATE secret_table SET is_active = FALSE WHERE udid = %s"
+    cursor.execute(update_query, (udid,))
 
-    # Insert the new record (is_active will be TRUE by default)
-    insert_query = """
-        INSERT INTO secret_table (udid, computer_id, secret, expiration, is_active)
-        VALUES (%s, %s, %s, %s, TRUE)
-    """
-    values = (udid, computer_id, secret, expiration_timestamp)
-    cursor.execute(insert_query, values)
-    conn.commit()
-    cursor.close()
+# Insert the new record (is_active will be TRUE by default)
+insert_query = """
+    INSERT INTO secret_table (udid, computer_id, secret, expiration, is_active)
+    VALUES (%s, %s, %s, %s, TRUE)
+"""
+values = (udid, computer_id, secret, expiration_timestamp)
+cursor.execute(insert_query, values)
+conn.commit()
+cursor.close()
 
     return expiration_timestamp
 
@@ -265,6 +264,50 @@ def get_scoped_profile_ids(computer_ids):
 
     return scoped_profile_ids
 
+def move_profiles(profile_id):
+    # Connect to MySQL database
+    conn = mysql_connector.connect(
+        user=current_app.config['MYSQL_DATABASE_USER'],
+        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
+        host=current_app.config['MYSQL_DATABASE_HOST'],
+        database=current_app.config['MYSQL_DATABASE_DB']
+    )
+    
+
+    # Move records from active_profiles to expired_profiles
+    try:
+        # Start a transaction
+        conn.start_transaction()
+
+        # Query the active_profiles table for the given profile ID
+        query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
+        cursor = conn.cursor()
+        cursor.execute(query)
+        result = cursor.fetchall()
+
+        # Move records to the expired_profiles table
+        for row in result:
+            profile_id, computer_id = row
+            insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
+            cursor.execute(insert_query)
+
+        # Delete records from the active_profiles table
+        delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
+        cursor.execute(delete_query)
+
+        # Commit the transaction
+        conn.commit()
+    except Exception as e:
+        # Rollback the transaction in case of any errors
+        conn.rollback()
+        raise e
+    finally:
+        # Close database connection
+        conn.close()
+
+    return
+
+
 def unscope_profile(profile_id):
     token = generate_jamf_pro_token()
     url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + str(profile_id)
@@ -311,66 +354,10 @@ def unscope_profile(profile_id):
 
     if response.status_code in [200, 201]:
         print(f"Successfully unscoped profile with ID {profile_id}.")
-        move_profiles(profile_id)
-
-        # Wait for 600 seconds (10 minutes) to ensure that the profile has been unscoped and removed from the client machine.
-        time.sleep(10)
-
-        # Additional DELETE request
-        delete_response = requests.delete(url, headers=headers)
-
-        if delete_response.status_code == 200:
-            print(f"Successfully deleted profile with ID {profile_id}.")
-        elif response.status_code == 404:
-            print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
-        else:
-            print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
+        #move_profiles(profile_id)
 
     else:
         print(f"Failed to unscope profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
-
-def move_profiles(profile_id):
-    # Connect to MySQL database
-    conn = mysql_connector.connect(
-        user=current_app.config['MYSQL_DATABASE_USER'],
-        password=current_app.config['MYSQL_DATABASE_PASSWORD'],
-        host=current_app.config['MYSQL_DATABASE_HOST'],
-        database=current_app.config['MYSQL_DATABASE_DB']
-    )
-    
-
-    # Move records from active_profiles to expired_profiles
-    try:
-        # Start a transaction
-        conn.start_transaction()
-
-        # Query the active_profiles table for the given profile ID
-        query = f"SELECT profile_id, computer_id FROM active_profiles WHERE profile_id = {profile_id}"
-        cursor = conn.cursor()
-        cursor.execute(query)
-        result = cursor.fetchall()
-
-        # Move records to the expired_profiles table
-        for row in result:
-            profile_id, computer_id = row
-            insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
-            cursor.execute(insert_query)
-
-        # Delete records from the active_profiles table
-        delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
-        cursor.execute(delete_query)
-
-        # Commit the transaction
-        conn.commit()
-    except Exception as e:
-        # Rollback the transaction in case of any errors
-        conn.rollback()
-        raise e
-    finally:
-        # Close database connection
-        conn.close()
-
-    return
 
 
 cleanup_lock = Lock()
@@ -421,46 +408,32 @@ processed_profiles = set()
 
 
 def delete_profiles_for_udid(udid):
+    from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
+    print ("Preparing to delete profiiles for UDID: " + udid)
     computer_id = get_computer_id(udid)
     if not computer_id:
         return {"error": "No computer found for the given UDID"}, 404
 
     # Get the profile IDs for the given computer ID
+    print ("computer ID: " + str(computer_id))
     profile_ids = get_scoped_profile_ids([computer_id])
     if not profile_ids:
+        print ("No profiles found for the given computer ID ")
         return {"message": "No profiles found for the given computer ID"}, 200
 
     # Unscope and delete profiles
+    print ("profile IDs: " + str(profile_ids))
     for profile_id in profile_ids:
+        print ("profile ID: " + str(profile_id))
+        print ("unscoping profile...")
         unscope_profile(profile_id)
-        move_profiles(profile_id)
-        threading.Timer(600, delete_profile_after_delay, args=[profile_id]).start()
+        
+        # Schedule the Celery task to run after a 600-second delay
+        print(f"Scheduling profile deletion for profile ID {profile_id} in 60 seconds")
+        delete_profile_after_delay.apply_async(args=[profile_id], countdown=60)
 
     return {"message": "Profile deletion scheduled for all profiles of the given computer ID"}, 200
-
-def delete_profile_after_delay(profile_id):
-    # Here, you should add the code to delete the profile in Jamf Pro.
-    # This will depend on the API provided by Jamf Pro.
-    # For example, you might need to send a DELETE request to a specific URL.
-    # You might also need to include some headers in the request.
-    # Here's a basic example:
-    token = generate_jamf_pro_token()
-    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
-    headers = {
-        "Accept": "application/xml",
-        "Content-Type": "application/xml",
-        "Authorization": f"Bearer {token}"
-    }
-    response = requests.delete(url, headers=headers)
-
-    if response.status_code == 200:
-        print(f"Successfully deleted profile with ID {profile_id}.")
-    elif response.status_code == 404:
-        print(f"Profile with ID {profile_id} not found. It may have already been deleted.")
-    else:
-        print(f"Failed to delete profile with ID {profile_id}. Status code: {response.status_code}, Response: {response.text}")
-
 
 def check_for_existing_profile(profile_name):
     # The base URL for the Jamf Pro API
