@@ -6,6 +6,7 @@ import logging
 from celery import Celery
 import importlib.util
 import os
+import sys
 from services import generate_jamf_pro_token
 
 # Load config
