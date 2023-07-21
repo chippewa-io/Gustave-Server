@@ -409,6 +409,8 @@ processed_profiles = set()
 
 
 def delete_profiles_for_udid(udid):
+    import sys
+    sys.path.append("/etc/gustave")
     from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
     computer_id = get_computer_id(udid)
@@ -425,6 +427,7 @@ def delete_profiles_for_udid(udid):
         unscope_profile(profile_id)
         
         # Schedule the Celery task to run after a 600-second delay
+        import sys
         print(f"Scheduling profile deletion for profile ID {profile_id} in 60 seconds")
         delete_profile_after_delay.apply_async(args=[profile_id], countdown=60)
 
