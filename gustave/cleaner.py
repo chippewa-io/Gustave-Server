@@ -149,6 +149,7 @@ def run_cleaner():
     while True:
         try:
             profile_cleanup()
+            print("checked for profiles...")
             time.sleep(30)  # Sleep for 30 seconds before the next iteration
         except Exception as e:
             logger.error(f"Error in cleaner script: {e}")
