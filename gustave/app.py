@@ -59,9 +59,6 @@ def create_app(config_name=None):
     from services import init_db
     init_db(app)
 
-    # Initialize the cleaner
-    from cleaner import run_cleaner
-
     # Initialize chequamegon
     from chequamegon import run_activation_check
 
@@ -80,6 +77,9 @@ def create_app(config_name=None):
 
 if __name__ == '__main__':
     app = create_app()
+
+    # Initialize the cleaner
+    from cleaner import run_cleaner
 
     # Start the activation check in a separate thread
     #activation_thread = Thread(target=run_activation_check)
