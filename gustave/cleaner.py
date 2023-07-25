@@ -145,11 +145,14 @@ def profile_cleanup():
                 logger.error(f"Failed to update deletion timestamp for profile ID: {profile_id}")
 
 ###############################################
-# Continuous loop to run the profile deletion
-while True:
-    try:
-        profile_cleanup()
-        time.sleep(30)  # Sleep for 30 seconds before the next iteration
-    except Exception as e:
-        logger.error(f"Error in cleaner script: {e}")
-        time.sleep(60)  # If an error occurs, sleep for a minute before retrying
+def run_cleaner():
+    while True:
+        try:
+            profile_cleanup()
+            time.sleep(30)  # Sleep for 30 seconds before the next iteration
+        except Exception as e:
+            logger.error(f"Error in cleaner script: {e}")
+            time.sleep(60)  # If an error occurs, sleep for a minute before retrying
+
+if __name__ == '__main__':
+    run_cleaner()
