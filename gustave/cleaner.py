@@ -4,6 +4,8 @@ import sys
 import mysql.connector
 import logging
 import requests
+from datetime import datetime
+
 ###############################################
 # Adjust sys.path to find the config module
 sys.path.append('/etc/gustave')
