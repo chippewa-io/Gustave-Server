@@ -24,11 +24,6 @@ logger.setLevel(logging.INFO)
 username = Config.JAMF_PRO_USERNAME
 password = Config.JAMF_PRO_PASSWORD
 JamfURL = Config.JAMF_PRO_URL
-host=Config.MYSQL_DATABASE_HOST
-user=Config.MYSQL_DATABASE_USER
-dbpass=Config.MYSQL_DATABASE_PASSWORD
-database=Config.MYSQL_DATABASE_DB,
-port=Config.MYSQL_DATABASE_PORT
 
 ###############################################
 #Database operations
@@ -37,7 +32,7 @@ def query_db():
     connection = mysql.connector.connect(
         host=Config.MYSQL_DATABASE_HOST,
         user=Config.MYSQL_DATABASE_USER,
-        dbpass=Config.MYSQL_DATABASE_PASSWORD,
+        password=Config.MYSQL_DATABASE_PASSWORD,
         database=Config.MYSQL_DATABASE_DB,
         port=Config.MYSQL_DATABASE_PORT
     )
@@ -64,7 +59,7 @@ def update_deletion(profile_id):
     connection = mysql.connector.connect(
         host=Config.MYSQL_DATABASE_HOST,
         user=Config.MYSQL_DATABASE_USER,
-        dbpass=Config.MYSQL_DATABASE_PASSWORD,
+        password=Config.MYSQL_DATABASE_PASSWORD,
         database=Config.MYSQL_DATABASE_DB,
         port=Config.MYSQL_DATABASE_PORT
     )
