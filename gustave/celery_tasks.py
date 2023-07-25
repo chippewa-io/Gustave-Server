@@ -61,7 +61,7 @@ def delete_profile_after_delay(profile_id):
     # Here's a basic example:
     print ("running... delete_profile_after_delay")
     token = generate_jamf_pro_token()
-    url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + profile_id
+    url = JAMF_PRO_URL + '/JSSResource/osxconfigurationprofiles/id/' + str(profile_id)
     headers = {
         "Accept": "application/xml",
         "Content-Type": "application/xml",
