@@ -59,20 +59,6 @@ def create_app(config_name=None):
     from services import init_db
     init_db(app)
 
-    # Initialize chequamegon
-    from chequamegon import run_activation_check
-
-    # Initialize the cleaner
-    from cleaner import run_cleaner
-
-    # Start the activation check in a separate thread
-    activation_thread = Thread(target=run_activation_check)
-    activation_thread.start()
-
-    # Start the profile cleanup in a separate thread
-    cleaner_thread = Thread(target=run_cleaner)
-    cleaner_thread.start()
-
     # Register blueprints
     from routes.computers import computers_bp
     from routes.secret import secrets_bp
@@ -84,14 +70,33 @@ def create_app(config_name=None):
 
     return app
 
+def run_core_app(app):
+    if app.config['USE_WAITRESS']:
+        serve(app, host='127.0.0.1', port=8000)
+    else:
+        app.run(host='127.0.0.1', port=8000, debug=True)
+
 if __name__ == '__main__':
     app = create_app()
 
-    if app.config['USE_WAITRESS']:
-        serve(app, host='127.0.0.1', port=8000)
-        # Poll the event, check every week
-        while not license_invalid_event.is_set():
-            time.sleep(604800)  # Check again in a week
-            os.kill(os.getpid(), signal.SIGINT)
-    else:
-        app.run(host='127.0.0.1', port=8000, debug=True)
+    # Initialize the functions to be threaded
+    from chequamegon import run_activation_check
+    from cleaner import run_cleaner
+
+    # Start the activation check in a separate thread
+    activation_thread = Thread(target=run_activation_check)
+    activation_thread.start()
+
+    # Start the profile cleanup in a separate thread
+    cleaner_thread = Thread(target=run_cleaner)
+    cleaner_thread.start()
+
+    # Start the core app functionality in a separate thread
+    core_app_thread = Thread(target=run_core_app, args=(app,))
+    core_app_thread.start()
+
+    # Now, in the main thread, we can do any periodic checks or shutdown checks, or just let it join other threads.
+    activation_thread.join()
+    cleaner_thread.join()
+    core_app_thread.join()
+
