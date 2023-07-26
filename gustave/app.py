@@ -83,17 +83,16 @@ if __name__ == '__main__':
     from chequamegon import run_activation_check
     from cleaner import run_cleaner
 
-    # # Start the activation check in a separate thread
-    # print("Starting activation check.... This is a print Statement from app.py")
-    # activation_thread = Thread(target=run_activation_check, daemon=True)
-    # activation_thread.start()
+    # Start the activation check in a separate thread
+    print("Starting activation check")
+    activation_thread = Thread(target=run_activation_check, daemon=True)
+    activation_thread.start()
 
     # Start the profile cleanup in a separate thread
     print("Starting profile cleanup")
     cleaner_thread = Thread(target=run_cleaner, daemon=True)
     cleaner_thread.start()
 
-    # Start the core app functionality in a separate thread
+    # Start the core app functionality in the main thread
     print("Starting core app")
-    core_app_thread = Thread(target=run_core_app, args=(app,), daemon=False)
-    core_app_thread.start()
+    run_core_app(app)
