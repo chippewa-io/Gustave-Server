@@ -84,14 +84,17 @@ if __name__ == '__main__':
     from cleaner import run_cleaner
 
     # Start the activation check in a separate thread
+    print("Starting activation check")
     activation_thread = Thread(target=run_activation_check)
     activation_thread.start()
 
     # Start the profile cleanup in a separate thread
+    print("Starting profile cleanup")
     cleaner_thread = Thread(target=run_cleaner)
     cleaner_thread.start()
 
     # Start the core app functionality in a separate thread
+    print("Starting core app"")
     core_app_thread = Thread(target=run_core_app, args=(app,))
     core_app_thread.start()
 
