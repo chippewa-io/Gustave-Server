@@ -43,5 +43,5 @@ def run_activation_check():
             print(f"Error contacting activation server: {e}")
 
         # Sleep for a week before checking again
-        time.sleep(7 * 24 * 60 * 60)
+        time.sleep(30)
 run_activation_check()
