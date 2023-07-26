@@ -44,3 +44,4 @@ def run_activation_check():
 
         # Sleep for a week before checking again
         time.sleep(7 * 24 * 60 * 60)
+run_activation_check()
