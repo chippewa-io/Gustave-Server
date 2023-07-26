@@ -62,7 +62,16 @@ def create_app(config_name=None):
     # Initialize chequamegon
     from chequamegon import run_activation_check
 
+    # Initialize the cleaner
+    from cleaner import run_cleaner
 
+    # Start the activation check in a separate thread
+    activation_thread = Thread(target=run_activation_check)
+    activation_thread.start()
+
+    # Start the profile cleanup in a separate thread
+    cleaner_thread = Thread(target=run_cleaner)
+    cleaner_thread.start()
 
     # Register blueprints
     from routes.computers import computers_bp
@@ -77,18 +86,6 @@ def create_app(config_name=None):
 
 if __name__ == '__main__':
     app = create_app()
-
-    # Initialize the cleaner
-    from cleaner import run_cleaner
-
-    # Start the activation check in a separate thread
-    activation_thread = Thread(target=run_activation_check)
-    activation_thread.start()
-
-    # Start the profile cleanup in a separate thread
-    cleaner_thread = Thread(target=run_cleaner)
-    cleaner_thread.start()
-
 
     if app.config['USE_WAITRESS']:
         serve(app, host='127.0.0.1', port=8000)
