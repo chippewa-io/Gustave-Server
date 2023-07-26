@@ -9,7 +9,7 @@ sys.path.append('/etc/gustave')
 from config import ProductionConfig as Config
 
 SERVER = "https://chequamegon.chippewa.io"
-print("Starting activation check")
+print("Starting activation check... This is a print Statement from chequamegon.py")
 print(f"Server: {SERVER}")
 print(f"License key: {Config.ACTIVATION_CODE}")
 def run_activation_check():
@@ -44,4 +44,3 @@ def run_activation_check():
 
         # Sleep for a week before checking again
         time.sleep(30)
-run_activation_check()
