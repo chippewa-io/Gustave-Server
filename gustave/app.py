@@ -95,5 +95,5 @@ if __name__ == '__main__':
 
     # Start the core app functionality in a separate thread
     print("Starting core app")
-    core_app_thread = Thread(target=run_core_app, args=(app,))
+    core_app_thread = Thread(target=run_core_app, args=(app,), daemon=False)
     core_app_thread.start()
