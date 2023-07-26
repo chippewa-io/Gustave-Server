@@ -3,6 +3,7 @@ import time
 import sys
 import mysql.connector
 import logging
+import logging.handlers
 import requests
 from datetime import datetime
 
