@@ -15,7 +15,7 @@ print(f"License key: {Config.ACTIVATION_CODE}")
 def run_activation_check():
     while True:
         license_key = Config.ACTIVATION_CODE
-        print ("starting activation check")
+        print ("starting activation check... This is a print Statement from chequamegon.py")
         data = {"license_key": license_key}
         try:
             response = requests.post(f"{SERVER}/api/verify", json=data, timeout=60)  # Add timeout to handle potential hangs
