@@ -15,7 +15,7 @@ print(f"License key: {Config.ACTIVATION_CODE}")
 def run_activation_check():
     while True:
         license_key = Config.ACTIVATION_CODE
-
+        print ("starting activation check")
         data = {"license_key": license_key}
         try:
             response = requests.post(f"{SERVER}/api/verify", json=data, timeout=60)  # Add timeout to handle potential hangs
@@ -29,6 +29,7 @@ def run_activation_check():
             # If server returns a 200 OK status
             if response.status_code == 200:
                 result = response.json()
+                print (result)
                 
                 # Only halt the program when License is suspended
                 if result.get('message') == 'License suspended':  
