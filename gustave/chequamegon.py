@@ -9,7 +9,9 @@ sys.path.append('/etc/gustave')
 from config import ProductionConfig as Config
 
 SERVER = "https://chequamegon.chippewa.io"
-
+print("Starting activation check")
+print(f"Server: {SERVER}")
+print(f"License key: {Config.ACTIVATION_CODE}")
 def run_activation_check():
     while True:
         license_key = Config.ACTIVATION_CODE
