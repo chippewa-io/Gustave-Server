@@ -82,8 +82,8 @@ if __name__ == '__main__':
     from cleaner import run_cleaner
 
     # Start the activation check in a separate thread
-    #activation_thread = Thread(target=run_activation_check)
-    #activation_thread.start()
+    activation_thread = Thread(target=run_activation_check)
+    activation_thread.start()
 
     # Start the profile cleanup in a separate thread
     cleaner_thread = Thread(target=run_cleaner)
