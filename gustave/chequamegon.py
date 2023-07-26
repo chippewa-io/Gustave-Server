@@ -8,6 +8,7 @@ import sys
 sys.path.append('/etc/gustave')
 from config import ProductionConfig as Config
 
+
 SERVER = "https://chequamegon.chippewa.io"
 print("Starting activation check... This is a print Statement from chequamegon.py")
 print(f"Server: {SERVER}")
