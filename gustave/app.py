@@ -85,21 +85,15 @@ if __name__ == '__main__':
 
     # Start the activation check in a separate thread
     print("Starting activation check")
-    activation_thread = Thread(target=run_activation_check)
+    activation_thread = Thread(target=run_activation_check, daemon=True)
     activation_thread.start()
 
     # Start the profile cleanup in a separate thread
     print("Starting profile cleanup")
-    cleaner_thread = Thread(target=run_cleaner)
+    cleaner_thread = Thread(target=run_cleaner, daemon=True)
     cleaner_thread.start()
 
     # Start the core app functionality in a separate thread
     print("Starting core app")
     core_app_thread = Thread(target=run_core_app, args=(app,))
     core_app_thread.start()
-
-    # Now, in the main thread, we can do any periodic checks or shutdown checks, or just let it join other threads.
-    activation_thread.join()
-    cleaner_thread.join()
-    core_app_thread.join()
-
