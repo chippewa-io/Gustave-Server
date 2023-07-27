@@ -291,6 +291,9 @@ def move_profiles(profile_id):
             profile_id, computer_id = row
             insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
             cursor.execute(insert_query)
+            # Logging the movement of the profile
+            logging.info(f"Moved profile with ID {profile_id} to the expired_profiles table for deletion.")
+
 
         # Delete records from the active_profiles table
         delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
