@@ -291,6 +291,9 @@ def move_profiles(profile_id):
             profile_id, computer_id = row
             insert_query = f"INSERT INTO expired_profiles (profile_id, computer_id) VALUES ({profile_id}, {computer_id})"
             cursor.execute(insert_query)
+            # Logging the movement of the profile
+            logging.info(f"Moved profile with ID {profile_id} to the expired_profiles table for deletion.")
+
 
         # Delete records from the active_profiles table
         delete_query = f"DELETE FROM active_profiles WHERE profile_id = {profile_id}"
@@ -409,9 +412,6 @@ processed_profiles = set()
 
 
 def delete_profiles_for_udid(udid):
-    import sys
-    sys.path.append("/etc/gustave")
-    from celery_tasks import delete_profile_after_delay
     # Get the computer ID for the given UDID
     computer_id = get_computer_id(udid)
     if not computer_id:
@@ -425,11 +425,7 @@ def delete_profiles_for_udid(udid):
     # Unscope and delete profiles
     for profile_id in profile_ids:
         unscope_profile(profile_id)
-        
-        # Schedule the Celery task to run after a 600-second delay
-        import sys
-        print(f"Scheduling profile deletion for profile ID {profile_id} in 60 seconds")
-        delete_profile_after_delay.apply_async(args=[profile_id], countdown=60)
+
 
     return {"message": "Profile deletion scheduled for all profiles of the given computer ID"}, 200
 
