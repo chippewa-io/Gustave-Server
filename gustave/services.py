@@ -1,10 +1,8 @@
 import requests
 import datetime
 import secrets
-import subprocess
 import time
 import logging
-import threading
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from threading import Lock
@@ -183,12 +181,18 @@ def create_payload_xml(profile_name, secret, expiration):
     xml_string = xml_string.replace("<", "&lt;").replace(">", "&gt;")
     
     return xml_string
-    
+
 def create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_name, secret, expiration, category_id, computer_id):
+    
+    # Check for existing profile
+    existing_profile = check_for_existing_profile(profile_name)
+    if existing_profile:
+        return {'error': 'A profile with this name already exists in Jamf Pro'}
+
     # Create the XML payload for the profile
     payloadXML = create_payload_xml(profile_name, secret, expiration)
 
-    # Now, construct the larger XML structure for the configuration profile
+    # Construct the larger XML structure for the configuration profile
     configProfileXML = f"""
     <os_x_configuration_profile>
         <general>
@@ -223,8 +227,13 @@ def create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_n
     auth = (jamfProUser, jamfProPass)
     
     response = requests.post(f"{jamfProURL}/{apiEndPoint}", data=configProfileXML, headers=headers, auth=auth)
+
+    # Extract the profile ID from the response
+    profile_id = extract_profile_id(response.text)
     
-    # Return the profile ID from the response
+    # Store it in the database
+    store_profile(profile_id, computer_id)
+
     return response.text
 
 def store_profile(profile_id, computer_id):
