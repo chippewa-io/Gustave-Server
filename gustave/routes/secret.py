@@ -5,6 +5,10 @@ from services import get_computer_id, generate_secret, store_secret, get_secret,
 
 secrets_bp = Blueprint('secrets', __name__)
 
+jamfProUser = current_app.config['JAMF_PRO_USERNAME']
+jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
+jamfProURL = current_app.config['JAMF_PRO_USERNAME']
+
 @secrets_bp.route('/secret', methods=['POST'])
 def new_secret():
     udid = request.form.get('udid')
@@ -28,7 +32,7 @@ def new_secret():
         category_id = current_app.config['CATEGORY_ID']
 
         # Create and scope a configuration profile in Jamf Pro
-        result = create_configuration_profile(computer_id, secret, expiration, category_id, profile_name)
+        result = create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_name, secret, expiration, category_id, computer_id)
 
         # If a profile with the same name already exists
         if 'error' in result:
