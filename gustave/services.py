@@ -65,7 +65,7 @@ def get_computer_id(udid):
     url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
     username = current_app.config['JAMF_PRO_USERNAME']
     password = current_app.config['JAMF_PRO_PASSWORD']
-    desired_group = current_app.config['SMART_GROUP_ID']
+    desired_group = current_app.config['SMART_GROUP']
 
     headers = {"Accept": "application/xml"}  # Still want XML for that juicy parsing action
     response = requests.get(url, auth=(username, password), headers=headers)
