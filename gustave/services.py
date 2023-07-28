@@ -59,21 +59,32 @@ def store_secret(udid, computer_id, secret):
 
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
-    print("UDID from gustace" + udid)
+    print("UDID from gustace: " + udid)
     url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
     username = current_app.config['JAMF_PRO_USERNAME']
     password = current_app.config['JAMF_PRO_PASSWORD']
+    desired_group = current_app.config['SMART_GROUP']
 
-    headers = {"Accept": "application/json"}
+    headers = {"Accept": "application/xml"}  # Still want XML for that juicy parsing action
     response = requests.get(url, auth=(username, password), headers=headers)
 
-    if response.status_code == 200:
-        computer_data = response.json().get('computer')
-        computer_id = computer_data.get('general').get('id')
-        return computer_id
-    else:
-        error_message = f"Failed to retrieve computer ID. Status code: {response.status_code}"
+    if response.status_code != 200:
+        error_message = f"Failed to retrieve computer info. Status code: {response.status_code}"
         raise Exception(error_message)
+
+    # Let's get to parsing that XML!
+    root = ET.fromstring(response.text)
+    computer_id = root.find(".//general/id").text
+
+    # Check if our desired group is hanging out in the computer_group_memberships
+    print("Searching for smartgroup membership...")
+    group_memberships = root.find(".//computer_group_memberships")
+    for group in group_memberships.findall("group"):
+        if group.text == desired_group:
+            return computer_id  # Found our group, so we're good to return the ID!
+
+    # If we made it here, seems like our computer ain't part of the desired group. Bummer.
+    raise Exception(f"Computer not in the desired group: {desired_group}")
 
 def generate_secret():
     secret = secrets.token_hex(16)
