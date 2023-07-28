@@ -1,7 +1,7 @@
 #secret.py
 from flask import Blueprint, request, jsonify, current_app
 import time
-from services import get_computer_id, generate_secret, store_secret, get_secret, create_and_scope_profile, get_secret_expiration
+from services import get_computer_id, generate_secret, store_secret, get_secret, create_configuration_profile, get_secret_expiration
 
 secrets_bp = Blueprint('secrets', __name__)
 
@@ -28,7 +28,7 @@ def new_secret():
         category_id = current_app.config['CATEGORY_ID']
 
         # Create and scope a configuration profile in Jamf Pro
-        result = create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name)
+        result = create_configuration_profile(computer_id, secret, expiration, category_id, profile_name)
 
         # If a profile with the same name already exists
         if 'error' in result:
