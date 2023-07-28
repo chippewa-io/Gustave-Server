@@ -121,48 +121,111 @@ def extract_profile_id(xml_string):
         print(f"Yo, we've got an XML parsing error. Check out this XML string:\n{xml_string}")
         return None
 
+def create_payload_xml(profile_name, secret, expiration):
+    root = ET.Element("plist", version="1.0")
 
-def create_and_scope_profile(computer_id, secret, expiration, category_id, profile_name):
-    jamfProURL = current_app.config['JAMF_PRO_URL']
-    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
-    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
+    dict_elem = ET.SubElement(root, "dict")
+    ET.SubElement(dict_elem, "key").text = "PayloadUUID"
+    ET.SubElement(dict_elem, "string").text = "42884445-1B56-4EA4-A3D6-7009702F5CC7"
+    ET.SubElement(dict_elem, "key").text = "PayloadType"
+    ET.SubElement(dict_elem, "string").text = "Configuration"
+    ET.SubElement(dict_elem, "key").text = "PayloadOrganization"
+    ET.SubElement(dict_elem, "string").text = "Jamf"
+    ET.SubElement(dict_elem, "key").text = "PayloadIdentifier"
+    ET.SubElement(dict_elem, "string").text = "42884445-1B56-4EA4-A3D6-7009702F5CC7"
+    ET.SubElement(dict_elem, "key").text = "PayloadDisplayName"
+    ET.SubElement(dict_elem, "string").text = profile_name
+    ET.SubElement(dict_elem, "key").text = "PayloadDescription"
+    ET.SubElement(dict_elem, "string").text = ""
+    ET.SubElement(dict_elem, "key").text = "PayloadVersion"
+    ET.SubElement(dict_elem, "integer").text = "1"
+    ET.SubElement(dict_elem, "key").text = "PayloadEnabled"
+    ET.SubElement(dict_elem, "true")
+    ET.SubElement(dict_elem, "key").text = "PayloadRemovalDisallowed"
+    ET.SubElement(dict_elem, "true")
+    ET.SubElement(dict_elem, "key").text = "PayloadScope"
+    ET.SubElement(dict_elem, "string").text = "System"
+    ET.SubElement(dict_elem, "key").text = "PayloadContent"
+    array_elem = ET.SubElement(dict_elem, "array")
+    dict2_elem = ET.SubElement(array_elem, "dict")
+    ET.SubElement(dict2_elem, "key").text = "PayloadDisplayName"
+    ET.SubElement(dict2_elem, "string").text = "Custom Settings"
+    ET.SubElement(dict2_elem, "key").text = "PayloadIdentifier"
+    ET.SubElement(dict2_elem, "string").text = "D9A57B93-83DE-40C5-AF59-B3E17B76041A"
+    ET.SubElement(dict2_elem, "key").text = "PayloadOrganization"
+    ET.SubElement(dict2_elem, "string").text = "JAMF Software"
+    ET.SubElement(dict2_elem, "key").text = "PayloadType"
+    ET.SubElement(dict2_elem, "string").text = "com.apple.ManagedClient.preferences"
+    ET.SubElement(dict2_elem, "key").text = "PayloadUUID"
+    ET.SubElement(dict2_elem, "string").text = "D9A57B93-83DE-40C5-AF59-B3E17B76041A"
+    ET.SubElement(dict2_elem, "key").text = "PayloadVersion"
+    ET.SubElement(dict2_elem, "integer").text = "1"
+    ET.SubElement(dict2_elem, "key").text = "PayloadContent"
+    dict3_elem = ET.SubElement(dict2_elem, "dict")
+    ET.SubElement(dict3_elem, "key").text = "io.chippewa.gustave"
+    dict4_elem = ET.SubElement(dict3_elem, "dict")
+    ET.SubElement(dict4_elem, "key").text = "Forced"
+    array2_elem = ET.SubElement(dict4_elem, "array")
+    dict5_elem = ET.SubElement(array2_elem, "dict")
+    ET.SubElement(dict5_elem, "key").text = "mcx_preference_settings"
+    dict6_elem = ET.SubElement(dict5_elem, "dict")
+    ET.SubElement(dict6_elem, "key").text = "Secret"
+    dict7_elem = ET.SubElement(dict6_elem, "dict")
+    ET.SubElement(dict7_elem, "key").text = "Expiration"
+    ET.SubElement(dict7_elem, "integer").text = str(expiration)
+    ET.SubElement(dict7_elem, "key").text = "value"
+    ET.SubElement(dict7_elem, "string").text = secret
 
-    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
-
-    # Construct the path to the bash script
-    script_path = os.path.join(base_path, 'resources', 'profile_create.sh')
-
-    # Command to execute the bash script with the provided arguments
-    command = f'{script_path} "{jamfProURL}" "{jamfProUser}" "{jamfProPass}" "{profile_name}" "{secret}" "{category_id}" "{computer_id}" "{expiration}"'
-
-    existing_profile = check_for_existing_profile(profile_name)
-    if existing_profile:
-        # If a profile with the same name already exists, return a message indicating this
-        return {'error': 'A profile with this name already exists in Jamf Pro'}
-
-
-    try:
-        # Execute the command
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-
-        # Capture the ID of the profile we're creating
-        script_output = result.stdout
-        #print(f"Script output: {script_output}")
-        # Extract the profile ID from the output
-        profile_id = extract_profile_id(script_output)
-        print(f"Extracted profile ID: {profile_id}")
-        #send it to the database
-        store_profile(profile_id, computer_id)
-        # Print the standard error
-        script_error = result.stderr
-        #print(f"Script error: {script_error}")
-       
-        return script_output
+    # Convert the XML structure to a string
+    xml_string = ET.tostring(root).decode()
     
-    except subprocess.CalledProcessError as e:
-        error_message = e.stderr
-        return {'error': error_message}
-        # Handle the error
+    # Escape the XML string
+    xml_string = xml_string.replace("<", "&lt;").replace(">", "&gt;")
+    
+    return xml_string
+    
+def create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_name, secret, expiration, category_id, computer_id):
+    # Create the XML payload for the profile
+    payloadXML = create_payload_xml(profile_name, secret, expiration)
+
+    # Now, construct the larger XML structure for the configuration profile
+    configProfileXML = f"""
+    <os_x_configuration_profile>
+        <general>
+            <name>{profile_name}</name>
+            <description>Test Profile</description>
+            <site>
+                <id>-1</id>
+                <name>None</name>
+            </site>
+             <category>
+               <id>{category_id}</id>
+             </category>
+            <distribution_method>Install Automatically</distribution_method>
+            <user_removable>true</user_removable>
+            <level>computer</level>
+            <redeploy_on_update>Newly Assigned</redeploy_on_update>
+            <payloads>{payloadXML}</payloads>
+        </general>
+      <scope>
+          <computers>
+            <computer>
+              <id>{computer_id}</id>
+            </computer>
+          </computers>
+        </scope>
+    </os_x_configuration_profile>
+    """
+
+    # Make the API call to Jamf Pro
+    apiEndPoint = "JSSResource/osxconfigurationprofiles/id/0"
+    headers = {"Content-Type": "text/xml"}
+    auth = (jamfProUser, jamfProPass)
+    
+    response = requests.post(f"{jamfProURL}/{apiEndPoint}", data=configProfileXML, headers=headers, auth=auth)
+    
+    # Return the profile ID from the response
+    return response.text
 
 def store_profile(profile_id, computer_id):
     conn = mysql.get_db()
