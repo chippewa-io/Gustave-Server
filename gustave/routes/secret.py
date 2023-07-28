@@ -6,11 +6,10 @@ from services import get_computer_id, generate_secret, store_secret, get_secret,
 secrets_bp = Blueprint('secrets', __name__)
 
 @secrets_bp.route('/secret', methods=['POST'])
-jamfProUser = current_app.config['JAMF_PRO_USERNAME']
-jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
-jamfProURL = current_app.config['JAMF_PRO_URL']
-
 def new_secret():
+    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
+    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
+    jamfProURL = current_app.config['JAMF_PRO_URL']
     udid = request.form.get('udid')
     
     existing_secret = get_secret(udid)
