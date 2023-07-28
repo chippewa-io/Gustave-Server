@@ -73,9 +73,6 @@ def get_computer_id(udid):
     if response.status_code != 200:
         error_message = f"Failed to retrieve computer info. Status code: {response.status_code}"
         raise Exception(error_message)
-    
-    print("XML Response:")
-    print(response.text)
 
     # Let's get to parsing that XML!
     root = ET.fromstring(response.text)
