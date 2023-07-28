@@ -56,7 +56,6 @@ def store_secret(udid, computer_id, secret):
     return expiration_timestamp
 
 
-
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
     print("UDID from gustace: " + udid)
