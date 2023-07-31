@@ -36,9 +36,10 @@ def get_computer_by_id():
 
         if token is None:
             return jsonify({'error': 'Failed to generate Jamf Pro token'})
+        
 
-        # Make the API request to Jamf Pro using the retrieved token
-        url = f"{jamf_pro_url}/JSSResource/computers/id/{computer_id}"
+         # Make the API request to the NEW Jamf Pro API using the retrieved token
+        url = f"{jamf_pro_url}/api/v1/computers-inventory-detail/{computer_id}"
         headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json"
