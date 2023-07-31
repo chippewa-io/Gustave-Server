@@ -30,8 +30,6 @@ def get_computer_by_id():
 
         computer_id = result[0]
         jamf_pro_url = current_app.config.get('JAMF_PRO_URL')
-        jamf_pro_username = current_app.config.get('JAMF_PRO_USERNAME')
-        jamf_pro_password = current_app.config.get('JAMF_PRO_PASSWORD')
 
         # Get the authentication token
         token = generate_jamf_pro_token()
