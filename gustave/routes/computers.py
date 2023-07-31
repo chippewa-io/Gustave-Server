@@ -30,17 +30,16 @@ def get_computer_by_id():
 
         computer_id = result[0]
         jamf_pro_url = current_app.config.get('JAMF_PRO_URL')
-        jamf_pro_username = current_app.config.get('JAMF_PRO_USERNAME')
-        jamf_pro_password = current_app.config.get('JAMF_PRO_PASSWORD')
 
         # Get the authentication token
         token = generate_jamf_pro_token()
 
         if token is None:
             return jsonify({'error': 'Failed to generate Jamf Pro token'})
+        
 
-        # Make the API request to Jamf Pro using the retrieved token
-        url = f"{jamf_pro_url}/JSSResource/computers/id/{computer_id}"
+         # Make the API request to the NEW Jamf Pro API using the retrieved token
+        url = f"{jamf_pro_url}/api/v1/computers-inventory-detail/{computer_id}"
         headers = {
             "Authorization": f"Bearer {token}",
             "Accept": "application/json"
