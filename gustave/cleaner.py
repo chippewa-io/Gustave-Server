@@ -7,7 +7,7 @@ import logging.handlers
 import requests
 from datetime import datetime
 
-###############################################
+
 # Adjust sys.path to find the config module
 sys.path.append('/etc/gustave')
 from config import ProductionConfig as Config
