@@ -88,9 +88,9 @@ if __name__ == '__main__':
     activation_thread = Thread(target=run_activation_check, daemon=True)
     activation_thread.start()
 
-    # Start the profile cleanup in a separate thread
+    # Start the profile cleanup in a separate thread, passing the app context
     print("Starting profile cleanup")
-    cleaner_thread = Thread(target=run_cleaner, daemon=True)
+    cleaner_thread = Thread(target=run_cleaner, args=(app,), daemon=True)
     cleaner_thread.start()
 
     # Start the core app functionality in the main thread

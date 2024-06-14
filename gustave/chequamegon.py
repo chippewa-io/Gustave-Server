@@ -10,13 +10,13 @@ from config import ProductionConfig as Config
 
 
 SERVER = "https://chequamegon.chippewa.io"
-print("Starting activation check... This is a print Statement from chequamegon.py")
-print(f"Server: {SERVER}")
-print(f"License key: {Config.ACTIVATION_CODE}")
 def run_activation_check():
     while True:
+        time.sleep(5)
         license_key = Config.ACTIVATION_CODE
-        print ("starting activation check... This is a print Statement from chequamegon.py")
+        print("Starting activation check...")
+        print(f"Verifying license with Server: {SERVER}")
+        print(f"License key: {Config.ACTIVATION_CODE}")
         data = {"license_key": license_key}
         try:
             response = requests.post(f"{SERVER}/api/verify", json=data, timeout=60)  # Add timeout to handle potential hangs
@@ -43,5 +43,5 @@ def run_activation_check():
         except requests.RequestException as e:
             print(f"Error contacting activation server: {e}")
 
-        # Sleep for a week before checking again
-        time.sleep(30)
+        # Sleep for a time before checking again
+        time.sleep(600)

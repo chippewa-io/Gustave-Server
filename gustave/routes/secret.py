@@ -1,21 +1,18 @@
-#secret.py
 from flask import Blueprint, request, jsonify, current_app
 import time
-from services import get_computer_id, generate_secret, store_secret, get_secret, create_configuration_profile, get_secret_expiration
+from services import get_computer_id, generate_secret, store_secret, get_secret, create_configuration_profile, get_secret_expiration, generate_jamf_pro_token
 
 secrets_bp = Blueprint('secrets', __name__)
 
 @secrets_bp.route('/secret', methods=['POST'])
 def new_secret():
-    jamfProUser = current_app.config['JAMF_PRO_USERNAME']
-    jamfProPass = current_app.config['JAMF_PRO_PASSWORD']
     jamfProURL = current_app.config['JAMF_PRO_URL']
     udid = request.form.get('udid')
-    
+
     existing_secret = get_secret(udid)
     if existing_secret and existing_secret['expiration'] > time.time():
         return jsonify({'message': 'A secret already exists for this computer'})
-    
+
     # Step 1: Fetch the Computer ID from Jamf Pro using the UDID
     computer_id = get_computer_id(udid)
 
@@ -30,8 +27,11 @@ def new_secret():
         profile_name = f"Computer ID {computer_id}"
         category_id = current_app.config['CATEGORY_ID']
 
-        # Create and scope a configuration profile in Jamf Pro
-        result = create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_name, secret, expiration, category_id, computer_id)
+        # Generate the Jamf Pro API token
+        token = generate_jamf_pro_token()
+
+        # Create and scope a configuration profile in Jamf Pro using the token
+        result = create_configuration_profile(jamfProURL, profile_name, secret, expiration, category_id, computer_id)
 
         # If a profile with the same name already exists
         if 'error' in result:
@@ -41,7 +41,6 @@ def new_secret():
         return jsonify({'success': True})
 
     return jsonify({'error': 'Failed to generate secret'})
-
 
 @secrets_bp.route('/secret/expiration', methods=['GET'])
 def obtain_expiration():
