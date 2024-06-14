@@ -26,6 +26,7 @@ def get_computer_by_id():
         result = cur.fetchone()
 
         if result is None:
+            print(f"Computer request submitted with expired token")
             return jsonify({'error': 'No computer found with the provided UDID and secret'})
 
         computer_id = result[0]

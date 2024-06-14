@@ -58,32 +58,58 @@ def store_secret(udid, computer_id, secret):
 
 #For collecting the Computer ID from Jamf Pro, to be stored in the database
 def get_computer_id(udid):
-    print("UDID from gustace: " + udid)
-    url = current_app.config['JAMF_PRO_URL'] + '/JSSResource/computers/udid/' + udid
-    username = current_app.config['JAMF_PRO_USERNAME']
-    password = current_app.config['JAMF_PRO_PASSWORD']
+    print("UDID from Gustave: " + udid)
+    
+    # Generate the token
+    token = generate_jamf_pro_token()
+
+    # Prepare the URL
+    url = current_app.config['JAMF_PRO_URL'] + f'/JSSResource/computers/udid/{udid}'
     desired_group = current_app.config['SMART_GROUP']
 
-    headers = {"Accept": "application/xml"}  # Still want XML for that juicy parsing action
-    response = requests.get(url, auth=(username, password), headers=headers)
+    # Set the headers with the token
+    headers = {
+        "Accept": "application/xml",
+        "Authorization": f"Bearer {token}"
+    }
+
+    # Make the request
+    response = requests.get(url, headers=headers)
+
+    # Log the request details
+    logging.debug(f"Request URL: {url}")
+    logging.debug(f"Request Headers: {headers}")
+    logging.debug(f"Response Status Code: {response.status_code}")
+    logging.debug(f"Response Content: {response.content}")
 
     if response.status_code != 200:
-        error_message = f"Failed to retrieve computer info. Status code: {response.status_code}"
+        error_message = f"Failed to retrieve computer info. Status code: {response.status_code}, Response: {response.content}"
+        logging.error(error_message)
         raise Exception(error_message)
 
-    # Let's get to parsing that XML!
-    root = ET.fromstring(response.text)
-    computer_id = root.find(".//general/id").text
+    try:
+        # Parse the XML response
+        root = ET.fromstring(response.text)
+        computer_id = root.find(".//general/id").text
 
-    # Check if our desired group is hanging out in the computer_group_memberships
-    print("Searching for smartgroup membership...")
-    group_memberships = root.find(".//computer_group_memberships")
-    for group in group_memberships.findall("group"):
-        if group.text == desired_group:
-            return computer_id  # Found our group, so we're good to return the ID!
+        # Check if the desired group is in the computer_group_memberships
+        logging.debug("Searching for smart group membership...")
+        group_memberships = root.find(".//computer_group_memberships")
+        for group in group_memberships.findall("group"):
+            if group.text == desired_group:
+                return computer_id  # Found the group, return the ID
 
-    # If we made it here, seems like our computer ain't part of the desired group. Bummer.
-    raise Exception(f"Computer not in the desired group: {desired_group}")
+        # If the computer is not part of the desired group
+        raise Exception(f"Computer not in the desired group: {desired_group}")
+    
+    except ET.ParseError as e:
+        error_message = f"Failed to parse XML response: {e}"
+        logging.error(error_message)
+        raise Exception(error_message)
+    except AttributeError as e:
+        error_message = f"Failed to find the required XML elements: {e}"
+        logging.error(error_message)
+        raise Exception(error_message)
 
 def generate_secret():
     secret = secrets.token_hex(16)
@@ -107,15 +133,31 @@ def get_secret(udid):
         return None
 
 def generate_jamf_pro_token():
-    url = current_app.config['JAMF_PRO_URL'] + '/uapi/auth/tokens'
-    auth = (current_app.config['JAMF_PRO_USERNAME'], current_app.config['JAMF_PRO_PASSWORD'])
-    headers = {"Accept": "application/json"}
+    url = current_app.config['JAMF_PRO_URL'] + "/api/oauth/token"
+    client_id = current_app.config['JAMF_PRO_CLIENT_ID']
+    client_secret = current_app.config['JAMF_PRO_CLIENT_SECRET']
+    
+    data = {
+        'client_id': client_id,
+        'grant_type': 'client_credentials',
+        'client_secret': client_secret
+    }
 
-    response = requests.post(url, auth=auth, headers=headers)
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    response = requests.post(url, data=data, headers=headers)
+    
+    # Debugging logs
+    print("URL:", url)
+    print("Data:", data)
+    print("Response Status Code:", response.status_code)
+    print("Response Content:", response.content)
 
     if response.status_code == 200:
-        jamfToken = response.json().get('token')
-        return jamfToken
+        access_token = response.json().get('access_token')
+        return access_token
     else:
         raise Exception(f"Failed to generate Jamf Pro API token: {response.content}")
 
@@ -192,12 +234,9 @@ def create_payload_xml(profile_name, secret, expiration):
     
     return xml_string
 
-def create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_name, secret, expiration, category_id, computer_id):
-    
-    # Check for existing profile
-    existing_profile = check_for_existing_profile(profile_name)
-    if existing_profile:
-        return {'error': 'A profile with this name already exists in Jamf Pro'}
+def create_configuration_profile(jamfProURL, profile_name, secret, expiration, category_id, computer_id):
+    # Generate a new token
+    token = generate_jamf_pro_token()
 
     # Create the XML payload for the profile
     payloadXML = create_payload_xml(profile_name, secret, expiration)
@@ -212,39 +251,53 @@ def create_configuration_profile(jamfProURL, jamfProUser, jamfProPass, profile_n
                 <id>-1</id>
                 <name>None</name>
             </site>
-             <category>
-               <id>{category_id}</id>
-             </category>
+            <category>
+                <id>{category_id}</id>
+            </category>
             <distribution_method>Install Automatically</distribution_method>
             <user_removable>true</user_removable>
             <level>computer</level>
             <redeploy_on_update>Newly Assigned</redeploy_on_update>
             <payloads>{payloadXML}</payloads>
         </general>
-      <scope>
-          <computers>
-            <computer>
-              <id>{computer_id}</id>
-            </computer>
-          </computers>
+        <scope>
+            <computers>
+                <computer>
+                    <id>{computer_id}</id>
+                </computer>
+            </computers>
         </scope>
     </os_x_configuration_profile>
     """
 
     # Make the API call to Jamf Pro
     apiEndPoint = "JSSResource/osxconfigurationprofiles/id/0"
-    headers = {"Content-Type": "text/xml"}
-    auth = (jamfProUser, jamfProPass)
-    
-    response = requests.post(f"{jamfProURL}/{apiEndPoint}", data=configProfileXML, headers=headers, auth=auth)
+    headers = {
+        "Content-Type": "application/xml",
+        "Authorization": f"Bearer {token}"
+    }
 
-    # Extract the profile ID from the response
-    profile_id = extract_profile_id(response.text)
-    
-    # Store it in the database
-    store_profile(profile_id, computer_id)
+    response = requests.post(f"{jamfProURL}/{apiEndPoint}", data=configProfileXML, headers=headers)
 
-    return response.text
+    # Print the response for debugging
+    print("Response Status Code:", response.status_code)
+    print("Response Content:", response.content.decode())
+
+    if response.status_code == 201:
+        # Parse the XML response to get the profile ID
+        root = ET.fromstring(response.content)
+        profile_id = root.find("id").text
+
+        # Store the profile ID in the database
+        store_profile(profile_id, computer_id)
+        return {"success": True, "profile_id": profile_id}
+    else:
+        try:
+            error_response = response.json()
+        except ValueError:
+            error_response = {"error": "Unable to parse response"}
+
+        return {"error": error_response}
 
 def store_profile(profile_id, computer_id):
     conn = mysql.get_db()
@@ -258,19 +311,27 @@ def store_profile(profile_id, computer_id):
     cursor.close()
 
 def retrieve_computer_record(computer_id):
+    # Generate the token
+    token = generate_jamf_pro_token()
+
+    # Prepare the URL
     url = current_app.config['JAMF_PRO_URL'] + f'/JSSResource/computers/id/{computer_id}'
-    username = current_app.config['JAMF_PRO_USERNAME']
-    password = current_app.config['JAMF_PRO_PASSWORD']
 
-    headers = {"Accept": "application/json"}
-    response = requests.get(url, auth=(username, password), headers=headers)
+    # Set the headers with the token
+    headers = {
+        "Accept": "application/json",
+        "Authorization": f"Bearer {token}"
+    }
 
+    # Make the request
+    response = requests.get(url, headers=headers)
+
+    # Check the response status
     if response.status_code == 200:
         computer_record = response.json().get('computer')
         return computer_record
 
     return None
-
 
 def check_for_expired_secrets():
     # Get the current time as a Unix timestamp
