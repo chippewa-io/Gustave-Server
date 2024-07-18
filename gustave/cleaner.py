@@ -9,7 +9,7 @@ from flask import current_app
 
 # Adjust sys.path to find the config module
 sys.path.append('/etc/gustave')
-from config import ProductionConfig as Config
+from gustave_config import ProductionConfig as Config
 from services import generate_jamf_pro_token  # Import the token generation function
 
 ###############################################

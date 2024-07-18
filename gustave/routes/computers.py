@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request, current_app
-from flaskext.mysql import MySQL
+from flask_mysqldb import MySQL
 import requests
 from services import mysql
 from services import generate_jamf_pro_token

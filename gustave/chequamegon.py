@@ -5,8 +5,9 @@ import signal
 import sys
 
 # import config
-sys.path.append('/etc/gustave')
-from config import ProductionConfig as Config
+#sys.path.append('/etc/gustave')
+print(sys.path)
+from gustave_config import ProductionConfig as Config
 
 
 SERVER = "https://chequamegon.chippewa.io"

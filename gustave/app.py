@@ -23,7 +23,7 @@ sys.path.append('/etc/gustave')
 
 ###############################################
 # Load config
-spec = importlib.util.spec_from_file_location('config', '/etc/gustave/config.py')
+spec = importlib.util.spec_from_file_location('config', '/etc/gustave/gustave_config.py')
 config_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config_module)
 
