@@ -1,8 +1,8 @@
 import requests
 import time
 import os
-import signal
 import sys
+import logging
 
 # import config
 #sys.path.append('/etc/gustave')
