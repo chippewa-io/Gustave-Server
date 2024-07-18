@@ -6,7 +6,7 @@ import logging
 import mysql.connector as mysql_connector
 import xml.etree.ElementTree as ET
 from threading import Lock
-from flaskext.mysql import MySQL
+from flask_mysqldb import MySQL
 from flask import Flask
 import sys
 import os
