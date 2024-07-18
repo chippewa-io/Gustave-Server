@@ -1,17 +1,14 @@
 import sys
 import os
-import signal
 import importlib.util
 from flask import Flask
 from waitress import serve
 import logging
 import logging.handlers
-import threading
-from threading import Thread
-from threading import Event
+from threading import Thread, Event
 
 ###############################################
-#setup event to signal license invalid
+# Setup event to signal license invalid
 license_invalid_event = Event()
 
 ###############################################
@@ -22,7 +19,7 @@ sys.path.append(parent_dir)
 sys.path.append('/etc/gustave')
 
 ###############################################
-# Load config
+# Load config from /etc/gustave/gustave_config.py
 spec = importlib.util.spec_from_file_location('config', '/etc/gustave/gustave_config.py')
 config_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(config_module)
