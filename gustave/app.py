@@ -1,95 +1,59 @@
-import sys
+import requests
+import time
 import os
-import importlib.util
-from flask import Flask
-from waitress import serve
+import sys
 import logging
-import logging.handlers
-from threading import Thread, Event
 
 ###############################################
-# Setup event to signal license invalid
-license_invalid_event = Event()
-
-###############################################
-# Add the parent directory to the path
-current_dir = os.path.dirname(os.path.realpath(__file__))
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
+# Add the path to the custom config file
 sys.path.append('/etc/gustave')
 
 ###############################################
-# Load config from /etc/gustave/gustave_config.py
-spec = importlib.util.spec_from_file_location('config', '/etc/gustave/gustave_config.py')
-config_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(config_module)
+# Load config
+from gustave_config import ProductionConfig as Config
 
 ###############################################
-# Set up logging
-log_size = 10 * 1024 * 1024  # 10 MB
-handler = logging.handlers.RotatingFileHandler('/var/log/gustave.log', maxBytes=log_size, backupCount=3)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-handler.setFormatter(formatter)
-logging.basicConfig(level=logging.INFO, handlers=[handler])
+# Setup Logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 ###############################################
-def create_app(config_name=None):
-    app = Flask(__name__)
+# License Server Variables
+SERVER = "https://chequamegon.chippewa.io"
+CHECK_INTERVAL = 600  # 10 minutes
+SLEEP_ON_ERROR = 7 * 24 * 60 * 60  # 7 days
 
-    # Determine configuration based on environment variable or passed argument
-    if config_name is None:
-        config_name = os.getenv('FLASK_CONFIG', 'development')
+###############################################
+# RUN
+def run_activation_check():
+    while True:
+        license_key = Config.ACTIVATION_CODE
+        logging.info("Starting activation check...")
+        logging.info(f"Verifying license with Server: {SERVER}")
+        logging.info(f"License key: {Config.ACTIVATION_CODE}")
+        data = {"license_key": license_key}
 
-    if config_name == 'development':
-        Config = config_module.DevelopmentConfig
-    elif config_name == 'testing':
-        Config = config_module.TestingConfig
-    elif config_name == 'production':
-        Config = config_module.ProductionConfig
-    else:
-        Config = config_module.DevelopmentConfig
+        try:
+            response = requests.post(f"{SERVER}/api/verify", json=data, timeout=60)  # Add timeout to handle potential hangs
+            
+            if response.status_code not in [200, 404]:
+                logging.error(f"Unexpected status code {response.status_code}")
+                time.sleep(SLEEP_ON_ERROR)
+                continue
+            
+            if response.status_code == 200:
+                result = response.json()
+                logging.info(result)
+                
+                if result.get('message') == 'License suspended':
+                    os.kill(os.getpid(), signal.SIGINT)
+                    
+            elif response.status_code == 404:
+                logging.warning("Received 404: License might not be found or there's an issue with the server")
 
-    # Apply configuration
-    app.config.from_object(Config)
+        except requests.RequestException as e:
+            logging.error(f"Error contacting activation server: {e}")
 
-    # Initialize services & extensions
-    from services import init_db
-    init_db(app)
-
-    # Register blueprints
-    from routes.computers import computers_bp
-    from routes.secret import secrets_bp
-    from routes.profiles import profiles_bp
-
-    app.register_blueprint(computers_bp, url_prefix='/api')
-    app.register_blueprint(secrets_bp, url_prefix='/api')
-    app.register_blueprint(profiles_bp, url_prefix='/api')
-
-    return app
-
-def run_core_app(app):
-    if app.config['USE_WAITRESS']:
-        serve(app, host='127.0.0.1', port=8000)
-    else:
-        app.run(host='127.0.0.1', port=8000, debug=True)
+        time.sleep(CHECK_INTERVAL)
 
 if __name__ == '__main__':
-    app = create_app()
-
-    # Initialize the functions to be threaded
-    from chequamegon import run_activation_check
-    from cleaner import run_cleaner
-
-    # Start the activation check in a separate thread
-    print("Starting activation check")
-    activation_thread = Thread(target=run_activation_check, daemon=True)
-    activation_thread.start()
-
-    # Start the profile cleanup in a separate thread, passing the app context
-    print("Starting profile cleanup")
-    cleaner_thread = Thread(target=run_cleaner, args=(app,), daemon=True)
-    cleaner_thread.start()
-
-    # Start the core app functionality in the main thread
-    print("Starting core app")
-    run_core_app(app)
+    run_activation_check()
