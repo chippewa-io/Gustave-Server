@@ -1,0 +1,436 @@
+*   8217e56 (HEAD -> REFACTOR, origin/REFACTOR) Merge pull request #56 from chippewa-io/TASK-131
+|\  
+| * b1e6cd4 (origin/TASK-131) Enhance cleaner.py: implement logging, improve exception handling, refactor code for better readability
+|/  
+*   e0c6798 Merge pull request #55 from chippewa-io/TASK-130B
+|\  
+| * c1ff72e Enhance chequamegon.py: implement logging, improve exception handling, remove unused import
+|/  
+*   6f66840 Merge pull request #54 from chippewa-io/TASK-130
+|\  
+| * 59d6102 Enhance chequamegon.py: implement logging, improve exception handling, remove unused import
+|/  
+*   d82acd5 Merge pull request #52 from chippewa-io/TASK-129
+|\  
+| * bccdf53 (origin/TASK-129) Refactor app.py, removed extraneous imports
+|/  
+*   3d6ef25 Merge pull request #51 from chippewa-io/TASK-128
+|\  
+| * a3d0284 (origin/TASK-128) Refactor configuration and fix import issues
+|/  
+*   a5080ba (origin/main, origin/HEAD, main, TASK-128) Merge pull request #50 from chippewa-io/TASK-117
+|\  
+| * 4d5748b (origin/TASK-117, TASK-117) Commit
+|/  
+*   ef1b9e1 Merge pull request #49 from chippewa-io/NewTestBranch
+|\  
+| * 416d5ec (origin/NewTestBranch, NewTestBranch) Removed comment line
+|/  
+*   c365f6d Merge pull request #48 from chippewa-io/TASK-45
+|\  
+| * 6d9df65 Update computers.py
+| * 293744e Extraneous variables removed
+|/  
+*   88a3ce7 Merge pull request #47 from chippewa-io/TASK-82
+|\  
+| * 2f02626 Update services.py
+|/  
+*   1d4d977 Merge pull request #46 from chippewa-io/TASK-80
+|\  
+| * 59314cd Update services.py
+| * 011a39a Update services.py
+| * cf761f4 Update services.py
+| * 41268e6 Update services.py
+* |   e316c07 Merge pull request #45 from chippewa-io/TASK-77
+|\ \  
+| |/  
+|/|   
+| * a6d8450 update to create_configuration_profile
+| * 5f4a52d removing legacy bash
+| * afd36cc Update secret.py
+| * b75756f Update secret.py
+| * de6ad66 Update secret.py
+| * dafdb0f Update secret.py
+| * 2a19c6a removal of bash code
+|/  
+*   5a28d4f Merge pull request #44 from chippewa-io/TASK-69
+|\  
+| * 82d6c1d Update services.py
+| * c907e4d Update services.py
+* |   e13618c Merge pull request #42 from chippewa-io/Prod
+|\ \  
+| * \   ad53167 Merge pull request #41 from chippewa-io/main
+| |\ \  
+| |/ /  
+|/| /   
+| |/    
+* |   3c2c961 Merge pull request #40 from chippewa-io/TASK-63
+|\ \  
+| |/  
+|/|   
+| * 7cba85c Testing flow - didn't alter code outside of a blank row.
+* | 21bbd61 (origin/Dev) Merge pull request #39 from chippewa-io/TASK-63
+|\| 
+| * 3baa6d9 Update app.py
+| * 0099d71 Updates
+| * 8ff6967 Update chequamegon.py
+| * f730920 Update app.py
+| * cb3bbda Update app.py
+| * 07bbb53 Update app.py
+| * 5695aec Update app.py
+| * d5e45a2 Update app.py
+| * 0a7d6d6 Update app.py
+| * 05220b7 Update app.py
+| * b5fd3b6 Update app.py
+| * 2dd8a58 Update app.py
+| * 5611dc6 Update cleaner.py
+| * 67c1193 Update chequamegon.py
+| * 0337c8d Update chequamegon.py
+| * fb252cb Update chequamegon.py
+| * e83be88 Update chequamegon.py
+| * d767aa7 Update chequamegon.py
+|/  
+*   c4ab1c0 Merge pull request #38 from chippewa-io/TASK-62
+|\  
+| * 0ccd54b Update cleaner.py
+| * bbea5ca Update cleaner.py
+| * 6ec5e86 Update cleaner.py
+| * a07339a Update app.py
+| * 6a38ff2 Update app.py
+| * a295288 Update app.py
+| * 35326d2 updates
+| * 5b9cee4 initial
+| * 6b8b08e Update celery_tasks.py
+* |   5cad245 Merge pull request #37 from chippewa-io/TASK-55
+|\ \  
+| * | 01ee6b0 Update Work
+| |/  
+| * 16fdf8f Update services.py
+|/  
+* 9942a04 Update services.py
+*   e8bf598 Merge pull request #36 from chippewa-io/TASK-44
+|\  
+| * b406fe1 Updated Celery
+* |   5a0d8fa Merge pull request #35 from chippewa-io/TASK-44
+|\ \  
+| * \   ce4696e Merge branch 'main' into TASK-44
+| |\ \  
+| |/ /  
+|/| /   
+| |/    
+* |   eff56ea Merge pull request #34 from chippewa-io/TASK-42
+|\ \  
+| * | 502bb00 Update schema.sh
+| * | 7d34080 Create schema.sh
+| * | 1a1d29e Re-Added ExpirationTimestamp
+| * | 83bf4af Updated MySQL Database
+|/ /  
+| * f10e456 Fixed string error
+| * 7eb1e6d Update celery_tasks.py
+| * 157dab4 Update celeryconfig.py
+| * 7aec507 celeryconfig.py added
+| * 665c32a updating celery
+| * 58a9d9d trying a new app.py
+| * af18f52 Update app.py
+| * 33876af Update celery_tasks.py
+| * b409106 Update services.py
+| * 0fedbf2 Update services.py
+| * b3bc7e2 Update services.py
+| * 7bd94e4 Update services.py
+| *   f7307cb Merge branch 'TASK-44' of https://github.com/chippewa-io/Gustave-Server into TASK-44
+| |\  
+| | * c9b677d Update app.py
+| | * df82620 Removal of legacy code
+| | * 2f6e07e Update services.py
+| | * 6460eda Update celery_tasks.py
+| * | 3a85983 Update services.py
+| |/  
+| * 0f79909 Update celery_tasks.py
+| * 65fe61c Update celery_tasks.py
+| * 00be5a4 Update celery_tasks.py
+| * 47c5463 Update celery_tasks.py
+| * de0f7f5 Attempt 1 at resolving Circular Imports
+| * 4fdeb0a Updated move_profiles
+| * a572cbd Added celery_tasks.py
+|/  
+*   6ca3218 Merge pull request #33 from chippewa-io/server-rework
+|\  
+| * 3930db0 Delete now works from client binary.
+| * 03398a4 Update services.py
+| * c185d31 Update services.py
+| * 7312907 update
+| * 6d127dc Update services.py
+| * de4b874 working
+| * 2c79c54 Update services.py
+| * d085e03 re-work
+| * 66757be Update app.py
+|/  
+* 71c7fad Update services.py
+* ba1aaad Migrated client CLI tool to independent project 'Gustave-Client'
+* 0daef77 Moved installer to 'Gustave Installer' project
+*   5d58a81 Merge pull request #32 from chippewa-io/license_activation_Installer
+|\  
+| * 5480db0 Update Install.sh
+| * fb7d794 Update Install.sh
+| * d2f6d02 Update Install.sh
+| * 616cc46 Update Install.sh
+|/  
+*   cdbd759 (tag: alpha) Merge pull request #30 from chippewa-io/installer
+|\  
+| * d1e8ce2 Functional Installer
+| * f60e38e installer2
+| * 0ce7d0d Update uninstall.sh
+| * 1f68bd0 Create uninstall.sh
+| * c7a2a62 Comments
+|/  
+*   ccebd87 Merge pull request #29 from chippewa-io/ServerChanges
+|\  
+| *   94b7bf4 Merge pull request #28 from chippewa-io/compile
+| |\  
+| | * 3678433 compile
+| | * d7a8c4d Update gustave.service
+| | * cb6cd87 Update gustave.service
+| | * 7870319 Update Install.sh
+| | * 118b32a Update Install.sh
+| | * fda75d7 Update Install.sh
+| | * 77fbd82 update
+| | * fead456 Installer script work
+| | * f9ea57f Create test.sh
+| | * 44124c3 Create gustave
+| | * a8a1f0b updating for bash script
+| |/  
+| * 45feceb Merge pull request #26 from chippewa-io/wed
+|/| 
+| * 4844996 Update app.py
+| * 92aea86 Update app.py
+| * 0971098 Update services.py
+| * a3c80fe Update services.py
+| * 07c021c Update app.py
+| * b9edda6 Changed import imp to importlib.util
+| * d3d3da2 Update app.py
+| * 33dba67 updating location of config.py
+|/  
+*   1b0fac0 Merge pull request #25 from chippewa-io/fix_export
+|\  
+| * 4e2fbe0 Update app.py
+| * 2c1ed05 update
+| * a202cd3 Update app.py
+| * d3eb9af Update app.py
+|/  
+*   137ddd8 Merge pull request #24 from chippewa-io/thu
+|\  
+| * 5ce0274 Made three major updates, and one minor
+|/  
+* a7329af Delete secrets.db
+*   b82954f Merge pull request #23 from chippewa-io/ClientDeletion
+|\  
+| * a9e8c04 Delete .DS_Store
+| * 9fefa0c Update .gitignore
+| * 9bb942a Update .DS_Store
+| * 0bbfcf9 Update .DS_Store
+| * 978073a test
+| * ea449a9 updated
+| * ce828e1 updated
+| * fff8f1b Update .DS_Store
+| * b317036 Update .DS_Store
+| * b8f48f7 Update .DS_Store
+| * 8f543c1 Updated 'initiate' to delete profile once received
+* | 24111a5 Delete .DS_Store
+* |   244b48c Merge pull request #22 from chippewa-io/profileCleanup
+|\ \  
+| |/  
+|/|   
+| * 9ce45ae Update .DS_Store
+| * 32d4cc0 f
+| * 5a05887 Update .DS_Store
+| * 35668a2 se
+| * 7b22e86 updated
+| * f511878 updated
+| * 888525b Update .DS_Store
+| * ad78547 updated app.py
+| * 2b41aa1 Attempt. 1
+|/  
+*   2bfd229 Merge pull request #21 from chippewa-io/UDIDWork
+|\  
+| * 4bdf0d3 Properly gathering and sending UDID now.
+| * 2692689 added print to get_computer_id
+|/  
+*   48c0763 Merge pull request #20 from chippewa-io/Safety
+|\  
+| * 70b8625 Update .DS_Store
+| * 2a4c7b7 Update .DS_Store
+| * c7f069c Safety check complete
+|/  
+* 9a0d4f7 Updated to check for existing non expired secret before requesting a new one.
+*   27c7526 Merge pull request #19 from chippewa-io/ClientPush
+|\  
+| * 3d84602 Update UserInterfaceState.xcuserstate
+| * aed9c41 Server side Push options now working.
+|/  
+*   e357116 Merge pull request #18 from chippewa-io/Push
+|\  
+| * ecb8941 Update computers.py
+| * 40e8002 Update computers.py
+| * 0812f0c Update computers.py
+| * 5cf1e70 Update computers.py
+| * a85f53a Update computers.py
+| * 9d6ae18 Update computers.py
+| * 1c51ac9 Update computers.py
+| * fe4aa74 Update computers.py
+| * e182a61 Update computers.py
+| * 05a1769 Update app.py
+| * 67e22c8 Update computers.py
+| * 4ca2bbd Update app.py
+| * 90df25e Update computers.py
+|/  
+*   d0defc1 Merge pull request #17 from chippewa-io/ComputerQuery
+|\  
+| * cbfdafd Finished Computer Query
+|/  
+*   69717d7 Merge pull request #16 from chippewa-io/Cleanup
+|\  
+| * c427481 Updated "read" verb
+* | 0ee6115 Merge pull request #15 from chippewa-io/Cleanup
+|\| 
+| * 2aa3b85 Removed debugging.
+|/  
+*   76adda7 Merge pull request #14 from chippewa-io/Updated-Client
+|\  
+| * eb23b7b small
+| * 932a420 Updated Client Application
+| * 96f1b3b Update .DS_Store
+| * 88a1e8f Update .DS_Store
+|/  
+*   aeeee6c Merge pull request #13 from chippewa-io/ExpirationDate
+|\  
+| * 0bf5837 Update .DS_Store
+| * da66f05 Testing with including expiration datein profile
+|/  
+*   d52db01 Merge pull request #12 from chippewa-io/ErrorCorrectionServerSide
+|\  
+| * 8b8bf0d update
+| * 4e91b7b Update services.py
+| * c4620fc Update services.py
+| * c0ca3ef Update services.py
+| * 2735f86 Update services.py
+| * 9a04437 Update services.py
+| * a7c2fb0 Update services.py
+| * 1760c61 updates
+| * 1423229 Update app.py
+| * b9df6a6 Update app.py
+| * 01433fa Update app.py
+| * 73111d5 Update config.py
+| * 3fb47f7 Update app.py
+| * 78aab2a Update services.py
+| * 8c2428e Update app.py
+| * 0491369 Update services.py
+| * d82de74 Update services.py
+| * e4f60f1 Update services.py
+| * 40cb3c0 Update services.py
+| * b9e08c0 Update services.py
+| * c2c7e9d Update services.py
+| * 7168203 Update services.py
+| * 9268912 Update services.py
+| * a2cab66 Update services.py
+| * 3292625 Update services.py
+| * e11204b Update secret.py
+| * 72d51fa update
+| * cbb414b Update services.py
+| * 4a01242 Update services.py
+| * a55f235 Updated to handle errors and added the stuff for the expiration endpoint.
+|/  
+*   0431d07 Merge pull request #11 from chippewa-io/Sqlite
+|\  
+| * 37c5d0f Known strong state
+| * 7ea36fb Update UserInterfaceState.xcuserstate
+| * eec67af  updated gitignore
+| * 36e1707 Working Client
+| * 4195299 restored old profile_create.sh
+| * f5b8243 Update .DS_Store
+| * 4d5808a updated extract_profile function for error handling
+| * 8b0877c GPT's code from the sqllite suggestion
+* | d38ed2d Merge pull request #10 from chippewa-io/Sqlite
+|\| 
+| * 1d311d0 Updated gitignore
+| * 51ee4db Update .DS_Store
+| * b132218 further waitress config
+| * 074451a Waitress configuration
+| * d1ed554 config updates
+|/  
+*   05112fb Merge pull request #9 from chippewa-io/DEV_6-1B
+|\  
+| * a69c602 Create gustave.service
+* | e4c91d4 Update profile_create.sh
+* | 7bac862 Update requirements.txt
+* | b8dfce5 Publish Branch
+* | e10366c Merge pull request #8 from chippewa-io/DEV_6-1B
+|\| 
+| * 7a7c324 Update secret.py
+| * f69cb02 Update
+| * bbf91bf Update services.py
+| * 03fd2a1 Update services.py
+| * 0ca4de1 Update services.py
+| * 853342d Update services.py
+| * a599674 Update secret.py
+| * 96c59a0 Attempt at error handling if the computer already has a secret
+| * 2a39f1f Update services.py
+* | 9e88d54 Merge pull request #7 from chippewa-io/DEV_6-1B
+|\| 
+| * 195e256 Update config.py
+| * 1b3b5ec Update services.py
+| * cd9c688 Update services.py
+* | b6a3c80 Merge pull request #6 from chippewa-io/DEV_6-1B
+|\| 
+| * 8509d3d Update services.py
+| * 0611bcb Update services.py
+| * 2c89513 Update services.py
+| * ea14dee Update services.py
+| * 5f16801 Update services.py
+| * 230ab0a Update services.py
+| * 8ffefd2 Update services.py
+| * 60171b0 Update services.py
+| * 8c55222 Update services.py
+* | 66683ec Merge pull request #5 from chippewa-io/DEV_6-1B
+|\| 
+| * 731f3d2 Update services.py
+| * 21bc1b9 Update services.py
+| * 174c2ad Update services.py
+| * b81e68a Updated data payload in unscope_profile function.
+| * d8e4041 Update services.py
+| * f65dc69 Update services.py
+| * b3535d8 Update config.py
+| * c91a058 Update app.py
+| * 15b408d Update services.py
+| * ff50a34 Update services.py
+| * 883fe96 Update services.py
+| * fb0c491 Update services.py
+| * 3a2b3bb Update app.py
+| * 5112add Update app.py
+| * c6e6f2f Update services.py
+| * 7db7037 Update services.py
+| * ac437d3 Update services.py
+| * 81e4332 New Test
+* | 321d2f9 Merge pull request #4 from chippewa-io/DEV_6-1B
+|\| 
+| * d28b359 Update services.py
+| * 5b3bcc7 Update services.py
+| * 8c10a65 Update services.py
+| * 208d2af Update services.py
+| * daff506 Update services.py
+| * 517e47c Update services.py
+| * 3a0fed4 Update services.py
+| * f3b2dca Update services.py
+| * 7a68646 Update app.py
+| * affc37c Update app.py
+| * a58216a Update app.py
+| * c4d4136 hello world test
+|/  
+* 50035a7 Create README.md
+*   4cf4cce Merge pull request #2 from chippewa-io/Dev/6-1
+|\  
+| * 20ffa08 Delete test.txt
+* | 1233128 Merge pull request #1 from chippewa-io/Dev/6-1
+|\| 
+| * cdbe5e6 test
+|/  
+* bdaecf6 Initial Commit
