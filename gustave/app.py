@@ -1,15 +1,12 @@
 import sys
 import os
+import logging
+import logging.handlers
 import importlib.util
 from flask import Flask
 from waitress import serve
-import logging
-import logging.handlers
-from threading import Thread, Event
-
-###############################################
-# Setup event to signal license invalid
-license_invalid_event = Event()
+from threading import Thread
+from cleaner import run_cleaner
 
 ###############################################
 # Add the parent directory to the path
@@ -75,15 +72,6 @@ def run_core_app(app):
 
 if __name__ == '__main__':
     app = create_app()
-
-    # Initialize the functions to be threaded
-    from chequamegon import run_activation_check
-    from cleaner import run_cleaner
-
-    # Start the activation check in a separate thread
-    print("Starting activation check")
-    activation_thread = Thread(target=run_activation_check, daemon=True)
-    activation_thread.start()
 
     # Start the profile cleanup in a separate thread, passing the app context
     print("Starting profile cleanup")

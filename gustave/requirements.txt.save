@@ -1,0 +1,6 @@
+config==0.5.1
+Flask==3.0.3
+Flask_Bcrypt==1.0.1
+mysql_connector
+Requests==2.32.3
+waitress==3.0.0
