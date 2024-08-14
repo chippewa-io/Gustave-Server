@@ -29,6 +29,8 @@ JamfURL = Config.JAMF_PRO_URL
 ###############################################
 # Database operations
 def query_db():
+    connection = None
+    cursor = None
     try:
         connection = mysql.connector.connect(
             host=Config.MYSQL_DATABASE_HOST,
@@ -43,14 +45,15 @@ def query_db():
         query = f"SELECT profile_id FROM expired_profiles WHERE deletion < {current_epoch_timestamp}"
         cursor.execute(query)
         expired_profile_ids = [row[0] for row in cursor.fetchall()]
+        return expired_profile_ids
     except mysql.connector.Error as err:
         logger.error(f"Error querying the database: {err}")
         return []
     finally:
-        cursor.close()
-        connection.close()
-
-    return expired_profile_ids
+        if cursor:
+            cursor.close()
+        if connection:
+            connection.close()
 
 def update_deletion(profile_id):
     try:
