@@ -1,0 +1,21 @@
+# Open Source Release of Gustave
+
+We are making this tool open source after originally designing it as a commercial product. While it was initially intended to generate revenue—particularly in large commercial organizations—we have decided to release it under an open-source license to benefit the broader community.
+
+## Why Open Source?
+We believe that sharing this tool with the community will lead to:
+- Greater innovation and contributions from developers.
+- More transparency and trust in how the tool operates.
+- A wider audience benefiting from its capabilities.
+
+## Commercial Legacy Features
+Since this tool was originally built for commercial use, there may be features or code elements still present that were necessary for its original business model. We have not yet removed or modified these aspects, so:
+- Some functionality may still reference licensing, payments, or usage tracking.
+- Certain optimizations were designed with large-scale enterprise use in mind.
+- Documentation may still reflect its past commercial nature.
+
+## What’s Next?
+We encourage contributions from the community to refine and enhance the project. If you find remnants of commercial-related functionality that are no longer relevant, feel free to submit issues or pull requests.
+
+We’re excited to share this project and look forward to seeing how it evolves in the open-source ecosystem!
+
